@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Evanto.Mcp.CommandLineHost</RootNamespace>
+    <StartupObject>Evanto.Mcp.CommandLineHost.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core libraries -->
+    <PackageReference Include="BoxOfYellow.ConsoleMarkdownRenderer" />
+    <PackageReference Include="Markdig" />
+    <PackageReference Include="Microsoft.Extensions.AI" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+
+    <!-- OpenAI client support -->
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+    
+    <!-- Test packages -->
+    <PackageReference Include="Spectre.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="system-prompt.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../lib/Evanto.Mcp.Host/Evanto.Mcp.Host.csproj" />
+  </ItemGroup>
+</Project>
