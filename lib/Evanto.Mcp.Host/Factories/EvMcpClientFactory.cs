@@ -22,7 +22,7 @@ public static class EvMcpClientFactory
     /// <returns>   The list of MCP client information. </returns>
     ///-------------------------------------------------------------------------------------------------
     public static async Task<IList<EvMcpClientInfo>> CreateMcpClientsAsync(
-        EvHostSettings   rootConfig,
+        EvHostAppSettings   rootConfig,
         ILogger             logger)
     {   // check requirements
         ArgumentNullException.ThrowIfNull(rootConfig, nameof(rootConfig));

@@ -382,7 +382,7 @@ public class EvMcpServerTester(ILogger logger)
     ///-------------------------------------------------------------------------------------------------
     public static async Task TestAllMcpServersAsync(
         ILogger                 logger,
-        EvHostSettings       rootConfig,
+        EvHostAppSettings       rootConfig,
         IList<EvMcpClientInfo>    mcpClients)
     {
         try

@@ -1,17 +1,10 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Configuration;
-using ConsoleMarkdownRenderer;
-using System.Text.Json;
-using Evanto.Mcp.CommandLineHost.Helper;
 using Evanto.Mcp.Host.Factories;
 using Evanto.Mcp.Host.Tests;
 using Evanto.Mcp.Common.Settings;
-using OpenTelemetry;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Evanto.Mcp.Apps;
 
 namespace Evanto.Mcp.CommandLineHost;
 
@@ -26,16 +19,17 @@ public class Program
     /// <returns>   A Task that represents the asynchronous operation. </returns>
     ///-------------------------------------------------------------------------------------------------
     static async Task Main(String[] args)
-    {   // Check for help parameter
+    {   
+        // 1. Set up configuration and logging
+        var appHelper               = EvCmdAppHelper.Create;
+        var rootConfig              = appHelper.LoadConfiguration<EvHostAppSettings>(args);
+        var (logger, loggerFactory) = appHelper.GetLogger(rootConfig);
+
         if (args.Contains("--help") || args.Contains("-h"))
-        {
-            AppHelper.ShowHelp();
+        {   // Check for help parameter
+            appHelper.ShowHelp();
             return;
         }
-
-        // 1. Set up configuration and logging
-        var rootConfig              = AppHelper.LoadConfiguration(args);
-        var (logger, loggerFactory) = AppHelper.GetLogger(rootConfig);
 
         // 2. Configure OpenTelemetry if enabled (either from config or command line)
         TracerProvider? tracerProvider = null;
@@ -48,12 +42,12 @@ public class Program
                 rootConfig.Telemetry.Enabled = true;
             }
 
-            tracerProvider = AppHelper.ConfigureOpenTelemetry(rootConfig, logger);
+            tracerProvider = appHelper.ConfigureOpenTelemetry(rootConfig, logger);
         }
 
         if (args.Contains("--list"))
         {   // List available providers and exit
-            AppHelper.ShowAvailableProviders(rootConfig);
+            appHelper.ShowAvailableProviders(rootConfig);
             return;
         }
 
@@ -99,7 +93,7 @@ public class Program
                 }
 
                 // Start interactive chat loop
-                await AppHelper.StartInteractiveChatLoopAsync(logger, chatClient, allTools, rootConfig);
+                await appHelper.StartInteractiveChatLoopAsync(logger, chatClient, allTools, rootConfig);
             }
 
             catch (Exception chatClientEx)

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Evanto.Mcp.Common.Mcp;
 using Evanto.Mcp.Tools.SupportWizard.Contracts;
 using Evanto.Mcp.Tools.SupportWizard.Models;
 using Evanto.Mcp.Tools.SupportWizard.ViewModels;
@@ -14,7 +15,7 @@ namespace Evanto.Mcp.Tools.SupportWizard.Tools;
 /// <remarks>   SvK, 01.07.2025. </remarks>
 ///-------------------------------------------------------------------------------------------------
 [McpServerToolType]
-public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepository)
+public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepository) : EvMcpToolBase
 {
     private readonly ISupportWizardRepository mSupportWizardRepository = supportWizardRepository;
 
@@ -27,24 +28,39 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
     ///-------------------------------------------------------------------------------------------------
     [McpServerTool, Description("Supportanfragen für einen Kunden nach Email")]
     public async Task<String> GetSupportRequestsForCustomerByEmail(String customerEmail)
-    {
+    {   // check requirements
+        var validationError = ValidateNotEmpty(
+            customerEmail,
+            nameof(customerEmail),
+            "Email must not be empty.");
+
+        if (validationError != null)
+            return validationError;
+
+        // Repository-Call + NotFound + Error in einem Helper
+        return await ExecuteAsync(
+            () => mSupportWizardRepository.GetSupportRequestsForCustomerByEmailAsync(customerEmail),
+            results => results == null || !results.Any(),
+            results => results.Select(sr => new SupportRequestViewModel().InitFrom(sr)),
+            $"No support requests found for email '{customerEmail}'.");
+        /*
         try
         {
             if (String.IsNullOrWhiteSpace(customerEmail))
             {
-                return new { status = "error", message = "Email parameter is required and cannot be empty" }.Serialize();
+                return new { status = "error", message = "Email parameter is required and cannot be empty" }.ToJson();
             }
 
             var supportRequests = await mSupportWizardRepository.GetSupportRequestsForCustomerByEmailAsync(customerEmail);
 
             if (!supportRequests.Any())
             {
-                return new { status = "not_found", message = $"No support requests found for email: {customerEmail}" }.Serialize();
+                return new { status = "not_found", message = $"No support requests found for email: {customerEmail}" }.ToJson();
             }
 
             var viewModels = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -52,8 +68,8 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetSupportRequestsForCustomerByEmail() for '{customerEmail}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
-        }
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
+        }*/
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -70,19 +86,19 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (String.IsNullOrWhiteSpace(customerName))
             {
-                return new { status = "error", message = "Customer name parameter is required and cannot be empty" }.Serialize();
+                return new { status = "error", message = "Customer name parameter is required and cannot be empty" }.ToJson();
             }
 
             var supportRequests = await mSupportWizardRepository.GetSupportRequestsForCustomerByNameAsync(customerName);
 
             if (!supportRequests.Any())
             {
-                return new { status = "not_found", message = $"No support requests found for customer name: {customerName}" }.Serialize();
+                return new { status = "not_found", message = $"No support requests found for customer name: {customerName}" }.ToJson();
             }
 
             var viewModels = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -90,7 +106,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetSupportRequestsForCustomerByName() for '{customerName}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -129,7 +145,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var createdRequest  = await mSupportWizardRepository.CreateSupportRequestAsync(entity);
             var resultViewModel = new SupportRequestViewModel().InitFrom(createdRequest);
 
-            return new { status = "success", data = resultViewModel }.Serialize();
+            return new { status = "success", data = resultViewModel }.ToJson();
         }
 
         catch (Exception ex)
@@ -137,7 +153,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in CreateSupportRequest(): {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -165,7 +181,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var existingRequest = await mSupportWizardRepository.GetSupportRequestByUidAsync(uid);
             if (existingRequest == null)
             {
-                return new { status = "not_found", message = $"Support request with UID {uid} not found" }.Serialize();
+                return new { status = "not_found", message = $"Support request with UID {uid} not found" }.ToJson();
             }
 
             var viewModel = new SupportRequestViewModel
@@ -188,7 +204,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var updatedRequest  = await mSupportWizardRepository.UpdateSupportRequestAsync(updatedEntity);
             var resultViewModel = new SupportRequestViewModel().InitFrom(updatedRequest);
 
-            return new { status = "success", data = resultViewModel }.Serialize();
+            return new { status = "success", data = resultViewModel }.ToJson();
         }
 
         catch (Exception ex)
@@ -196,7 +212,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in UpdateSupportRequest() for UID {uid}: {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -216,7 +232,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var updatedRequest = await mSupportWizardRepository.AssignSupportRequestToUserAsync(supportRequestUid, userUid);
             var viewModel      = new SupportRequestViewModel().InitFrom(updatedRequest);
 
-            return new { status = "success", data = viewModel }.Serialize();
+            return new { status = "success", data = viewModel }.ToJson();
         }
 
         catch (Exception ex)
@@ -224,7 +240,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in AssignSupportRequestToUser() for request {supportRequestUid} to user {userUid}: {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -242,24 +258,24 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (String.IsNullOrWhiteSpace(topic))
             {
-                return new { status = "error", message = "Topic parameter is required and cannot be empty" }.Serialize();
+                return new { status = "error", message = "Topic parameter is required and cannot be empty" }.ToJson();
             }
 
             if (!Enum.TryParse<Topic>(topic, out var topicEnum))
             {
-                return new { status = "error", message = $"Invalid topic value: {topic}. Valid values are: {String.Join(", ", Enum.GetNames<Topic>())}" }.Serialize();
+                return new { status = "error", message = $"Invalid topic value: {topic}. Valid values are: {String.Join(", ", Enum.GetNames<Topic>())}" }.ToJson();
             }
 
             var users = await mSupportWizardRepository.GetUserByTopicAsync(topicEnum);
 
             if (!users.Any())
             {
-                return new { status = "not_found", message = $"No users found for topic: {topic}" }.Serialize();
+                return new { status = "not_found", message = $"No users found for topic: {topic}" }.ToJson();
             }
 
             var viewModels = users.Select(u => new UserViewModel().InitFrom(u));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -267,7 +283,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetUserByTopic() for topic '{topic}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -287,18 +303,18 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (String.IsNullOrWhiteSpace(status))
             {
-                return new { status = "error", message = "Status parameter is required and cannot be empty" }.Serialize();
+                return new { status = "error", message = "Status parameter is required and cannot be empty" }.ToJson();
             }
 
             if (!Enum.TryParse<Models.Status>(status, out var statusEnum))
             {
-                return new { status = "error", message = $"Invalid status value: {status}. Valid values are: {String.Join(", ", Enum.GetNames<Models.Status>())}" }.Serialize();
+                return new { status = "error", message = $"Invalid status value: {status}. Valid values are: {String.Join(", ", Enum.GetNames<Models.Status>())}" }.ToJson();
             }
 
             var updatedRequest = await mSupportWizardRepository.UpdateStatusForSupportRequestAsync(supportRequestUid, statusEnum, resolutionNotes);
             var viewModel      = new SupportRequestViewModel().InitFrom(updatedRequest);
 
-            return new { status = "success", data = viewModel }.Serialize();
+            return new { status = "success", data = viewModel }.ToJson();
         }
 
         catch (Exception ex)
@@ -306,7 +322,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in UpdateStatusForSupportRequest() for UID {supportRequestUid}: {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -325,13 +341,13 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (take > 1000)
             {
-                return new { status = "error", message = "Take parameter cannot exceed 1000 records" }.Serialize();
+                return new { status = "error", message = "Take parameter cannot exceed 1000 records" }.ToJson();
             }
 
             var supportRequests = await mSupportWizardRepository.GetAllSupportRequestsAsync(skip, take);
             var viewModels      = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels, pagination = new { skip, take, count = viewModels.Count() } }.Serialize();
+            return new { status = "success", data = viewModels, pagination = new { skip, take, count = viewModels.Count() } }.ToJson();
         }
 
         catch (Exception ex)
@@ -339,7 +355,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetAllSupportRequests(): {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -357,18 +373,18 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (String.IsNullOrWhiteSpace(status))
             {
-                return new { status = "error", message = "Status parameter is required and cannot be empty" }.Serialize();
+                return new { status = "error", message = "Status parameter is required and cannot be empty" }.ToJson();
             }
 
             if (!Enum.TryParse<Models.Status>(status, out var statusEnum))
             {
-                return new { status = "error", message = $"Invalid status value: {status}. Valid values are: {String.Join(", ", Enum.GetNames<Models.Status>())}" }.Serialize();
+                return new { status = "error", message = $"Invalid status value: {status}. Valid values are: {String.Join(", ", Enum.GetNames<Models.Status>())}" }.ToJson();
             }
 
             var supportRequests = await mSupportWizardRepository.GetSupportRequestsByStatusAsync(statusEnum);
             var viewModels      = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
         
         catch (Exception ex)
@@ -376,7 +392,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetSupportRequestsByStatus() for status '{status}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -394,18 +410,18 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (String.IsNullOrWhiteSpace(topic))
             {
-                return new { status = "error", message = "Topic parameter is required and cannot be empty" }.Serialize();
+                return new { status = "error", message = "Topic parameter is required and cannot be empty" }.ToJson();
             }
 
             if (!Enum.TryParse<Topic>(topic, out var topicEnum))
             {
-                return new { status = "error", message = $"Invalid topic value: {topic}. Valid values are: {String.Join(", ", Enum.GetNames<Topic>())}" }.Serialize();
+                return new { status = "error", message = $"Invalid topic value: {topic}. Valid values are: {String.Join(", ", Enum.GetNames<Topic>())}" }.ToJson();
             }
 
             var supportRequests = await mSupportWizardRepository.GetSupportRequestsByTopicAsync(topicEnum);
             var viewModels      = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -413,7 +429,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetSupportRequestsByTopic() for topic '{topic}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -431,14 +447,14 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
         {
             if (!Enum.IsDefined(typeof(Priority), priority))
             {
-                return new { status = "error", message = $"Invalid priority value: {priority}. Valid values are: 1 (Low), 2 (Medium), 3 (High)" }.Serialize();
+                return new { status = "error", message = $"Invalid priority value: {priority}. Valid values are: 1 (Low), 2 (Medium), 3 (High)" }.ToJson();
             }
 
             var priorityEnum    = (Priority)priority;
             var supportRequests = await mSupportWizardRepository.GetSupportRequestsByPriorityAsync(priorityEnum);
             var viewModels      = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -446,7 +462,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetSupportRequestsByPriority() for priority {priority}: {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -465,7 +481,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var supportRequests = await mSupportWizardRepository.GetSupportRequestsByAssigneeAsync(userUid);
             var viewModels      = supportRequests.Select(sr => new SupportRequestViewModel().InitFrom(sr));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -473,7 +489,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetSupportRequestsByAssignee() for user {userUid}: {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -490,7 +506,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var users      = await mSupportWizardRepository.GetAllUsersAsync();
             var viewModels = users.Select(u => new UserViewModel().InitFrom(u));
 
-            return new { status = "success", data = viewModels }.Serialize();
+            return new { status = "success", data = viewModels }.ToJson();
         }
 
         catch (Exception ex)
@@ -498,7 +514,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in GetAllUsers(): {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
     }
 
@@ -527,7 +543,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             var createdUser     = await mSupportWizardRepository.CreateUserAsync(entity);
             var resultViewModel = new UserViewModel().InitFrom(createdUser);
 
-            return new { status = "success", data = resultViewModel }.Serialize();
+            return new { status = "success", data = resultViewModel }.ToJson();
         }
 
         catch (Exception ex)
@@ -535,38 +551,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
             Console.Error.WriteLine($"Error in CreateUser(): {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.Serialize();
+            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
         }
-    }
-}
-
-///-------------------------------------------------------------------------------------------------
-/// <summary>   Extension methods for JSON serialization. </summary>
-///
-/// <remarks>   SvK, 01.07.2025. </remarks>
-///-------------------------------------------------------------------------------------------------
-internal static class JsonExtensions
-{
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Serializes an object to JSON. </summary>
-    ///
-    /// <remarks>   SvK, 01.07.2025. </remarks>
-    ///
-    /// <param name="obj"> The object to serialize. </param>
-    ///
-    /// <returns>   JSON representation of the object. </returns>
-    ///-------------------------------------------------------------------------------------------------
-    public static String Serialize(this Object obj)
-    {
-        ArgumentNullException.ThrowIfNull(obj, $"Object '{nameof(obj)}' to serialize cannot be null");
-
-        var jsonOptions = new JsonSerializerOptions
-        {
-            ReferenceHandler        = ReferenceHandler.IgnoreCycles,
-            WriteIndented           = true,
-            DefaultIgnoreCondition  = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        return JsonSerializer.Serialize(obj, jsonOptions);
     }
 }

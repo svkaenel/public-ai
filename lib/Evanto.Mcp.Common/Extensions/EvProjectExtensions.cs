@@ -11,7 +11,7 @@ public static class ProjectExtensions
     /// 
     /// <returns> The serialized object. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public static String Serialize(this Object? obj)
+    public static String ToJson(this Object? obj)
     {
         if (obj == null)
         {   // protect against null objects

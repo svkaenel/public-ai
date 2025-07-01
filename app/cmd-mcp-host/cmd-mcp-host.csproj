@@ -42,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj" />
     <ProjectReference Include="../../lib/Evanto.Mcp.Host/Evanto.Mcp.Host.csproj" />
   </ItemGroup>
 </Project>

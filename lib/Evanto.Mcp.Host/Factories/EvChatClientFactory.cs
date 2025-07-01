@@ -42,7 +42,7 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <exception cref="ArgumentNullException">    When rootConfig is null. </exception>
     /// <exception cref="InvalidOperationException"> When the selected provider is not found in the configuration. </exception>
     ///-------------------------------------------------------------------------------------------------
-    public IChatClient CreateChatClient(EvHostSettings rootConfig)
+    public IChatClient CreateChatClient(EvHostAppSettings rootConfig)
     {   // check requirements
         ArgumentNullException.ThrowIfNull(rootConfig);
         ArgumentNullException.ThrowIfNull(mLogger);

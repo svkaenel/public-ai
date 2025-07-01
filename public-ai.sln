@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -19,6 +19,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".doc", ".doc", "{A8DCE0F2-2
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Tools.SupportWizard", "lib\Evanto.Mcp.Tools.SupportWizard\Evanto.Mcp.Tools.SupportWizard.csproj", "{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "srv", "srv", "{9479024B-4DB4-4A31-7A43-5A015B7B3EFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sse-mcp-server", "srv\sse-mcp-server\sse-mcp-server.csproj", "{6E29769E-19E1-4832-979B-73B09FAE8938}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stdio-mcp-server", "srv\stdio-mcp-server\stdio-mcp-server.csproj", "{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Apps", "lib\Evanto.Mcp.Apps\Evanto.Mcp.Apps.csproj", "{A1C9F01A-540E-4407-9F24-41280D00DC31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Tools.SupportDocs", "lib\Evanto.Mcp.Tools.SupportDocs\Evanto.Mcp.Tools.SupportDocs.csproj", "{20DD354E-67FD-46C8-B0BD-34B27130949E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +52,22 @@ Global
 		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E29769E-19E1-4832-979B-73B09FAE8938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E29769E-19E1-4832-979B-73B09FAE8938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E29769E-19E1-4832-979B-73B09FAE8938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E29769E-19E1-4832-979B-73B09FAE8938}.Release|Any CPU.Build.0 = Release|Any CPU
+		{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C9F01A-540E-4407-9F24-41280D00DC31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1C9F01A-540E-4407-9F24-41280D00DC31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1C9F01A-540E-4407-9F24-41280D00DC31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1C9F01A-540E-4407-9F24-41280D00DC31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +77,10 @@ Global
 		{52D5F4BB-F385-1337-F71E-376D3BFA0F71} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 		{6A7F517E-9311-1FC0-2BC7-62D58192D65E} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
+		{6E29769E-19E1-4832-979B-73B09FAE8938} = {9479024B-4DB4-4A31-7A43-5A015B7B3EFE}
+		{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028} = {9479024B-4DB4-4A31-7A43-5A015B7B3EFE}
+		{A1C9F01A-540E-4407-9F24-41280D00DC31} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
+		{20DD354E-67FD-46C8-B0BD-34B27130949E} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77925787-747F-4405-88C9-232E967B9207}
