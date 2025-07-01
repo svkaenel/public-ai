@@ -15,6 +15,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".doc", ".doc", "{A8DCE0F2-25EF-3C7F-CC19-27B02264BF67}"
 	ProjectSection(SolutionItems) = preProject
 		CLAUDE.md = CLAUDE.md
+		CodingRules.md = CodingRules.md
 	EndProjectSection
 EndProject
 Global

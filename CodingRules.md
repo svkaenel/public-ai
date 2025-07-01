@@ -8,7 +8,7 @@ applyTo: '**/*.cs'
 
 ### Member Variables and Constructors
 
-1. Use a leading "m" to indicate a class member variable, e.g. "mPascalCaseVariable"
+1. Use a leading "m" to indicate a class member variable, e.g. "mPascalCaseVariable" - but not for local variables, never combine the 'm' prefix with 'var', this is wrong: var mTelemetryEnabled = .., this is right: var telemetryEnabled = ..
 2. Format multiple variables vertically aligned (visibility, type, names) as shown in example
 3. Use primary constructors direct in class declaration whereever possible
 4. Use .NET types instead of C# types, e.g. "String" instead of "string", "Int32" instead of "int"

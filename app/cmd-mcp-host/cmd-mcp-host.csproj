@@ -24,6 +24,12 @@
     
     <!-- Test packages -->
     <PackageReference Include="Spectre.Console" />
+    
+    <!-- OpenTelemetry packages -->
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
   </ItemGroup>
 
   <ItemGroup>

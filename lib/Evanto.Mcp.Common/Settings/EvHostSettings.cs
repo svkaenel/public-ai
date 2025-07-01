@@ -11,17 +11,19 @@ namespace Evanto.Mcp.Common.Settings;
 ///-------------------------------------------------------------------------------------------------
 public class EvHostSettings
 {
-    public Boolean                  UseConsoleLogging   { get; set; }         = false;
-    public Boolean                  ShowThinkNodes      { get; set; }         = false;
-    public Boolean                  RunTests            { get; set; }         = false;
-    public Boolean                  QuickTests          { get; set; }         = false;
-    public String                   SelectedProvider    { get; private set; } = String.Empty;
-    public String                   SelectedModel       { get; private set; } = String.Empty;
-    public String                   DefaultProvider     { get; set; }         = "Ionos";
+    public Boolean                      UseConsoleLogging   { get; set; }         = false;
+    public Boolean                      ShowThinkNodes      { get; set; }         = false;
+    public Boolean                      RunTests            { get; set; }         = false;
+    public Boolean                      QuickTests          { get; set; }         = false;
+    public Boolean                      EnableTelemetry     { get; set; }         = false;
+    public String                       SelectedProvider    { get; private set; } = String.Empty;
+    public String                       SelectedModel       { get; private set; } = String.Empty;
+    public String                       DefaultProvider     { get; set; }         = "Ionos";
     public EvChatClientSettings[]       Providers           { get; set; }         = Array.Empty<EvChatClientSettings>();
-    public IList<EvMcpServerSettings> McpServers          { get; set; }         = new List<EvMcpServerSettings>();
-    public EvWebSettings            WebUI               { get; set; }         = new();
-    public float                    Temperature         { get; set; }         = 0.5f;
+    public IList<EvMcpServerSettings>   McpServers          { get; set; }         = new List<EvMcpServerSettings>();
+    public EvWebSettings                WebUI               { get; set; }         = new();
+    public EvTelemetrySettings          Telemetry           { get; set; }         = new();
+    public float                        Temperature         { get; set; }         = 0.5f;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Helper method to find a provider by name. </summary>

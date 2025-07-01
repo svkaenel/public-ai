@@ -16,6 +16,7 @@ dotnet run --project app/cmd-mcp-host
 dotnet run --project app/cmd-mcp-host -- --help        # Show help
 dotnet run --project app/cmd-mcp-host -- --list        # List available providers
 dotnet run --project app/cmd-mcp-host -- --test        # Run MCP server tests
+dotnet run --project app/cmd-mcp-host -- --telemetry   # Enable OpenTelemetry monitoring
 ```
 
 ### Testing
@@ -53,9 +54,10 @@ This is an **MCP (Model Context Protocol) Host System** that integrates multiple
 - `EvChatClientFactory`: Creates AI chat clients for multiple providers (OpenAI, Azure, Ollama, etc.)
 
 ### Configuration System
-- **appsettings.json**: Main configuration file with providers, MCP servers, and tool tests
+- **appsettings.json**: Main configuration file with providers, MCP servers, tool tests, and telemetry
 - **Hierarchical structure**: Host → Provider → Server → Tool level configurations
 - **Multiple AI providers**: OpenAI, Azure OpenAI, Ollama, LMStudio, Ionos supported
+- **OpenTelemetry integration**: Configurable telemetry with OTLP and console exporters
 
 ### Testing Framework (lib/Evanto.Mcp.Host/Tests/)
 - `EvMcpServerTester`: Comprehensive testing of MCP servers and tools
@@ -72,6 +74,15 @@ The configuration uses a multi-provider approach where each provider has:
 - `ApiKey`: Authentication credentials
 - `DefaultModel`: Default model to use
 - `AvailableModels`: List of supported models
+
+### OpenTelemetry Configuration
+The `Telemetry` section in appsettings.json configures observability:
+- `Enabled`: Enable/disable telemetry collection
+- `ServiceName`: Service identifier for traces
+- `OtlpEndpoint`: OTLP exporter endpoint (default: http://localhost:4317)
+- `EnableConsoleExporter`: Output telemetry to console
+- `LogSensitiveData`: Control sensitive data logging
+- `ActivitySources`: Configure which activity sources to monitor
 
 ### MCP Server Configuration
 Each MCP server requires:
@@ -91,8 +102,14 @@ Each MCP server requires:
 - Spectre.Console for rich terminal UI output
 - Comprehensive logging with configurable levels
 
+## Documentation
+
+- If there are tools or frameworks necessary for implementation please use the Context7 MCP server to find the necessary documentation
+- If you don't find the documentation there, please perform a web search via Brave Search MCP server
+
 ## Key Dependencies
-- `Microsoft.Extensions.AI.*`: AI provider abstractions
+- `Microsoft.Extensions.AI.*`: AI provider abstractions with built-in OpenTelemetry support
 - `ModelContextProtocol`: Official MCP client library
+- `OpenTelemetry.*`: Observability and telemetry collection
 - `Spectre.Console`: Rich console output
 - `BoxOfYellow.ConsoleMarkdownRenderer`: Markdown rendering in console

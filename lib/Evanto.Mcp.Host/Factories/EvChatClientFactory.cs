@@ -61,21 +61,22 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
         modelName = modelName ?? settings.DefaultModel;
 
-        return CreateChatClient(settings, modelName);
+        return CreateChatClient(settings, modelName, rootConfig.Telemetry);
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Creates a chat client based on the configuration. </summary>
     ///
-    /// <remarks>   SvK, 23.06.2025. </remarks>
+    /// <remarks>   SvK, 01.07.2025. </remarks>
     /// 
-    /// <param name="settings">       The provider settings. </param>
-    /// <param name="modelName">      Optional. The name of the model to use. </param>
+    /// <param name="settings">           The provider settings. </param>
+    /// <param name="modelName">          Optional. The name of the model to use. </param>
+    /// <param name="telemetrySettings">  Optional. The telemetry settings for OpenTelemetry integration. </param>
     /// 
     /// <exception cref="ArgumentNullException">    When configuration is null. </exception>
     /// <exception cref="InvalidOperationException"> When an unknown provider is configured. </exception>
     ///-------------------------------------------------------------------------------------------------
-    public IChatClient CreateChatClient(EvChatClientSettings settings, String modelName)
+    public IChatClient CreateChatClient(EvChatClientSettings settings, String modelName, EvTelemetrySettings? telemetrySettings = null)
     {   // check requirements
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(mLogger);
@@ -98,14 +99,16 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
         mLogger.LogInformation("   Model: {Model}", modelName);
         mLogger.LogInformation("   Available Models: [{Models}]", String.Join(", ", settings.AvailableModels));
 
+        var telemetryEnabled = telemetrySettings?.Enabled ?? false;
+
         return settings.ProviderName.ToUpperInvariant() switch
         {
-            "OPENAI"   => CreateOpenAIChatClient(settings, modelName),
-            "IONOS"    => CreateOpenAIChatClient(settings, modelName),
-            "LMSTUDIO" => CreateOpenAIChatClient(settings, modelName),
-            "OLLAMA"   => CreateOllamaChatClient(settings, modelName),
-            "AZURE"    => CreateAzureChatClient(settings, modelName),
-            "AZUREOAI" => CreateAzureOpenAIChatClient(settings, modelName),
+            "OPENAI"   => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
+            "IONOS"    => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
+            "LMSTUDIO" => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
+            "OLLAMA"   => CreateOllamaChatClient(settings, modelName, telemetryEnabled),
+            "AZURE"    => CreateAzureChatClient(settings, modelName, telemetryEnabled),
+            "AZUREOAI" => CreateAzureOpenAIChatClient(settings, modelName, telemetryEnabled),
             _          => throw new InvalidOperationException(
                             $"Unknown chat client type: {settings.ProviderName}. " +
                             "Supported types: 'OpenAI', 'Ionos', 'LMStudio', 'Ollama', 'Azure', 'AzureOAI'.")
@@ -115,13 +118,15 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Creates an Ollama chat client. </summary>
     ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
-    /// <param name="settings">   The provider settings for Ollama. </param>
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    /// <param name="settings">           The provider settings for Ollama. </param>
+    /// <param name="modelName">          The name of the model to use. </param>
+    /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
     ///
     /// <returns>   The configured IChatClient for Ollama. </returns>
     /// <exception cref="InvalidOperationException">    When creating the Ollama client fails. </exception>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateOllamaChatClient(EvChatClientSettings settings, String modelName)
+    private IChatClient CreateOllamaChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
@@ -132,8 +137,15 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
             var ollamaClient = new OllamaChatClient(settings.Endpoint, modelName);
 
             // Wrap with additional features
-            var chatClient = new ChatClientBuilder(ollamaClient)
-                .UseLogging(mLoggerFactory)
+            var chatClientBuilder = new ChatClientBuilder(ollamaClient)
+                .UseLogging(mLoggerFactory);
+
+            if (telemetryEnabled)
+            {   // Add OpenTelemetry if enabled
+                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
+            }
+
+            var chatClient = chatClientBuilder
                 .UseFunctionInvocation()
                 .Build();
 
@@ -149,13 +161,15 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Creates a configured OpenAI chat client. </summary>
     ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
+    /// <remarks>   SvK, 01.07.2025. </remarks>
     ///
-    /// <param name="loggerFactory">    The logger factory for logging. </param>
+    /// <param name="settings">           The provider settings for OpenAI. </param>
+    /// <param name="modelName">          The name of the model to use. </param>
+    /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
     ///
     /// <returns>   The configured IChatClient. </returns>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateOpenAIChatClient(EvChatClientSettings settings, String modelName)
+    private IChatClient CreateOpenAIChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
@@ -174,8 +188,15 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
             var chatClient = openAiClient.GetChatClient(modelName).AsIChatClient();
 
             // build chat client with additional features
-            var finalChatClient = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory)
+            var chatClientBuilder = new ChatClientBuilder(chatClient)
+                .UseLogging(mLoggerFactory);
+
+            if (telemetryEnabled)
+            {   // Add OpenTelemetry if enabled
+                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
+            }
+
+            var finalChatClient = chatClientBuilder
                 .UseFunctionInvocation(mLoggerFactory, client =>
                 {
                     client.IncludeDetailedErrors = true; // Include detailed errors in function invocation
@@ -194,15 +215,16 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Creates a configured Azure OpenAI chat client. </summary>
     ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
+    /// <remarks>   SvK, 01.07.2025. </remarks>
     /// 
-    /// <param name="settings">       The provider settings for Azure OpenAI. </param>
-    /// <param name="modelName">      The name of the model to use. </param>
+    /// <param name="settings">           The provider settings for Azure OpenAI. </param>
+    /// <param name="modelName">          The name of the model to use. </param>
+    /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
     /// 
     /// <returns>   The configured IChatClient for Azure OpenAI. </returns>
     /// <exception cref="InvalidOperationException">    When creating the Azure OpenAI client fails. </exception>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateAzureOpenAIChatClient(EvChatClientSettings settings, String modelName)
+    private IChatClient CreateAzureOpenAIChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
@@ -218,8 +240,15 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
             var chatClient = azureOpenAiClient.GetChatClient(modelName).AsIChatClient();
 
             // build chat client with additional features
-            var finalChatClient = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory)
+            var chatClientBuilder = new ChatClientBuilder(chatClient)
+                .UseLogging(mLoggerFactory);
+
+            if (telemetryEnabled)
+            {   // Add OpenTelemetry if enabled
+                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
+            }
+
+            var finalChatClient = chatClientBuilder
                 .UseFunctionInvocation()
                 .Build();
 
@@ -235,21 +264,23 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Creates a configured Azure chat client. </summary>
     ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
-    /// <param name="settings">       The provider settings for Azure Inference. </param>
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    /// <param name="settings">           The provider settings for Azure Inference. </param>
+    /// <param name="modelName">          The name of the model to use. </param>
+    /// <param name="telemetrySettings">  Optional. The telemetry settings for OpenTelemetry integration. </param>
     /// 
     /// <returns>   The configured IChatClient for Azure Inference. </returns>
     /// 
     /// <exception cref="InvalidOperationException">    When creating the Azure Inference client fails. </exception>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateAzureChatClient(EvChatClientSettings settings, String modelName)
+    private IChatClient CreateAzureChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(modelName);
 
-            var endpoint = new Uri(settings.Endpoint);
+            var endpoint   = new Uri(settings.Endpoint);
             var credential = new AzureKeyCredential(settings.ApiKey);
 
             // ❸ Basisklient des Azure.AI.Inference-SDK
@@ -261,12 +292,19 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
                 )
             );
 
-            // ❹ In ein IChatClient der Microsoft.Extensions.AI-Welt umwandeln
+            // ❄ In ein IChatClient der Microsoft.Extensions.AI-Welt umwandeln
             var chatClient = inferenceClient.AsIChatClient(modelName);
 
             // build chat client with additional features
-            var finalChatClient = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory)
+            var chatClientBuilder = new ChatClientBuilder(chatClient)
+                .UseLogging(mLoggerFactory);
+
+            if (telemetryEnabled)
+            {   // Add OpenTelemetry if enabled
+                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
+            }
+
+            var finalChatClient = chatClientBuilder
                 .UseFunctionInvocation()
                 .Build();
 
@@ -292,9 +330,9 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <returns>   True if the connection is successful. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<Boolean> TestConnectionAsync(
-        IChatClient chatClient,
+        IChatClient       chatClient,
         CancellationToken cancellationToken = default,
-        Int32 timeoutSeconds = 60)
+        Int32             timeoutSeconds    = 60)
     {
         try
         {   // check requirements

@@ -8,8 +8,14 @@ using ModelContextProtocol.Client;
 using ConsoleMarkdownRenderer;
 using Microsoft.Extensions.Logging.Console;
 using Evanto.Mcp.Common.Settings;
+using OpenTelemetry.Trace;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 
 namespace Evanto.Mcp.CommandLineHost.Helper;
+
 
 public static class AppHelper
 {
@@ -33,7 +39,8 @@ public static class AppHelper
 
         // Parse command line parameters and adjust configuration
         rootConfig.ShowThinkNodes = args.Contains("--think");
-        rootConfig.RunTests       = args.Contains("--test") || true;
+        rootConfig.RunTests = args.Contains("--test") || true;
+        rootConfig.EnableTelemetry = args.Contains("--telemetry");
 
         rootConfig.SetSelectedProvider(GetCommandLineParameter(args, "--provider"));
         rootConfig.SetSelectedModel(GetCommandLineParameter(args, "--model"));
@@ -58,16 +65,78 @@ public static class AppHelper
             {   // Add console logging
                 builder.AddConsole().AddConsoleFormatter<ConsoleFormatter, ConsoleFormatterOptions>(options =>
                 {
-                    options.IncludeScopes   = true;         // Include scopes in console output
+                    options.IncludeScopes = true;         // Include scopes in console output
                     options.TimestampFormat = "HH:mm:ss ";  // Custom timestamp format
                 });
+            }
+
+            if (rootConfig.Telemetry.Enabled && rootConfig.Telemetry.EnableLogging)
+            {   // Add OpenTelemetry logging
+                ConfigureOpenTelemetryLogging(builder, rootConfig.Telemetry);
             }
         });
 
         // Return the logger instance
-        return (loggerFactory.CreateLogger("Brunner.Mcp.CommandLineClient"), loggerFactory); 
+        return (loggerFactory.CreateLogger("Brunner.Mcp.CommandLineClient"), loggerFactory);
     }
- 
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Configures OpenTelemetry tracing for the application. </summary>
+    ///
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    ///
+    /// <param name="rootConfig">   The root configuration containing telemetry settings. </param>
+    /// <param name="logger">       The logger for output. </param>
+    ///
+    /// <returns>   The configured TracerProvider. </returns>
+    ///-------------------------------------------------------------------------------------------------
+    public static TracerProvider ConfigureOpenTelemetry(EvHostSettings rootConfig, ILogger logger)
+    {
+        var telemetrySettings = rootConfig.Telemetry;
+
+        logger.LogInformation("🔍 Configuring OpenTelemetry...");
+        logger.LogInformation("   Service: {ServiceName} v{ServiceVersion}", telemetrySettings.ServiceName, telemetrySettings.ServiceVersion);
+        logger.LogInformation("   OTLP Endpoint: {OtlpEndpoint}", telemetrySettings.OtlpEndpoint);
+        logger.LogInformation("   Console Exporter: {EnableConsoleExporter}", telemetrySettings.EnableConsoleExporter);
+        logger.LogInformation("   Sampling Ratio: {SamplingRatio}", telemetrySettings.SamplingRatio);
+        logger.LogInformation("   Logging Enabled: {EnableLogging}", telemetrySettings.EnableLogging);
+        logger.LogInformation("   Log OTLP Exporter: {EnableLogOtlpExporter}", telemetrySettings.EnableLogOtlpExporter);
+
+        var tracerProviderBuilder = Sdk.CreateTracerProviderBuilder()
+            .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                .AddService(
+                    serviceName: telemetrySettings.ServiceName,
+                    serviceVersion: telemetrySettings.ServiceVersion))
+            .SetSampler(new TraceIdRatioBasedSampler(telemetrySettings.SamplingRatio));
+
+        // Add activity sources
+        foreach (var activitySource in telemetrySettings.ActivitySources)
+        {
+            tracerProviderBuilder.AddSource(activitySource);
+        }
+
+        // Configure exporters
+        if (telemetrySettings.EnableConsoleExporter)
+        {
+            tracerProviderBuilder.AddConsoleExporter();
+        }
+
+        if (telemetrySettings.EnableOtlpExporter)
+        {
+            tracerProviderBuilder.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(telemetrySettings.OtlpEndpoint);
+                options.Protocol = OtlpExportProtocol.Grpc;
+            });
+        }
+
+        var tracerProvider = tracerProviderBuilder.Build();
+
+        logger.LogInformation("✅ OpenTelemetry configured successfully");
+
+        return tracerProvider;
+    }
+
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Tests the chat client connection and functionality with MCP tools. </summary>
     ///
@@ -224,10 +293,10 @@ public static class AppHelper
     /// <returns>   A Task representing the asynchronous operation. </returns>
     ///-------------------------------------------------------------------------------------------------
     public static async Task StartInteractiveChatLoopAsync(
-        ILogger                 logger,
-        IChatClient             chatClient,
-        IList<McpClientTool>    allTools,
-        EvHostSettings       rootConfig)
+        ILogger logger,
+        IChatClient chatClient,
+        IList<McpClientTool> allTools,
+        EvHostSettings rootConfig)
     {   // Initialize conversation
         await logger.LogOutput("💬 Starting interactive chat with {0} + MCP tools...", rootConfig.SelectedProvider);
         await logger.LogOutput($"# === Interactive Chat with {rootConfig.SelectedProvider} + MCP ===");
@@ -259,7 +328,7 @@ public static class AppHelper
                 // Get the response with timeout and measure duration
                 var chatStopwatch = Stopwatch.StartNew();
                 using var chatCts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
-                var chatResponse  = await chatClient.GetResponseAsync(
+                var chatResponse = await chatClient.GetResponseAsync(
                     conversationHistory,
                     new ChatOptions { Tools = [.. allTools], Temperature = rootConfig.Temperature, ToolMode = ChatToolMode.Auto },
                     cancellationToken: chatCts.Token
@@ -342,6 +411,7 @@ public static class AppHelper
         Console.WriteLine();
         Console.WriteLine("  --test             Führt MCP Server Tests durch");
         Console.WriteLine("  --think            Zeigt <think>-Knoten in Chat-Antworten an");
+        Console.WriteLine("  --telemetry        Aktiviert OpenTelemetry-Überwachung");
         Console.WriteLine("  --provider <name>  Überschreibt den Standard-Provider (z.B. 'OpenAI', 'Ionos')");
         Console.WriteLine("  --model <name>     Überschreibt das Standard-Modell (z.B. 'gpt-4', 'meta-llama/Llama-3.3-70B-Instruct')");
         Console.WriteLine("  --list             Zeigt alle verfügbaren Provider und Modelle an");
@@ -351,6 +421,7 @@ public static class AppHelper
         Console.WriteLine("  dotnet run -- --provider OpenAI --model gpt-4");
         Console.WriteLine("  dotnet run -- --test --provider Ionos");
         Console.WriteLine("  dotnet run -- --think --model o4-mini");
+        Console.WriteLine("  dotnet run -- --telemetry --provider OpenAI");
         Console.WriteLine("  dotnet run -- --list");
         Console.WriteLine();
     }
@@ -411,6 +482,50 @@ public static class AppHelper
         {   // If markdown rendering fails, log the error and display raw response
             Console.WriteLine(message, args);
         }
+    }
+    
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Configures OpenTelemetry logging. </summary>
+    /// 
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    /// <param name="builder">          The logging builder to configure. </param>
+    /// <param name="telemetrySettings"> The telemetry settings from the configuration. </param>
+    /// <returns>   A Task representing the asynchronous operation. </returns>
+    ///-------------------------------------------------------------------------------------------------
+    private static void ConfigureOpenTelemetryLogging(ILoggingBuilder builder, EvTelemetrySettings telemetrySettings)
+    {
+        builder.AddOpenTelemetry(openTelemetryLoggerOptions =>
+        {   // Configure OpenTelemetry logging if enabled
+            var resourceBuilder = ResourceBuilder.CreateDefault()
+                .AddService(
+                    serviceName    : telemetrySettings.ServiceName,
+                    serviceVersion : telemetrySettings.ServiceVersion);
+
+            openTelemetryLoggerOptions.SetResourceBuilder(resourceBuilder);
+
+            if (telemetrySettings.EnableLogOtlpExporter)
+            {
+                openTelemetryLoggerOptions.AddOtlpExporter(exporter =>
+                {
+                    exporter.Endpoint = new Uri(telemetrySettings.OtlpEndpoint);
+                    exporter.Protocol = OtlpExportProtocol.Grpc;
+
+                    if (!String.IsNullOrEmpty(telemetrySettings?.Headers))
+                    {   // set if necessary
+                        exporter.Headers = telemetrySettings.Headers;
+                    }
+                });
+            }
+
+            if (telemetrySettings.EnableLogConsoleExporter)
+            {
+                openTelemetryLoggerOptions.AddConsoleExporter();
+            }
+
+            // Important options to improve data quality
+            openTelemetryLoggerOptions.IncludeScopes = true;
+            openTelemetryLoggerOptions.IncludeFormattedMessage = true;
+        });
     }
 
 }

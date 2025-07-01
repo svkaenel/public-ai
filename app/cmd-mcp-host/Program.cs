@@ -7,6 +7,11 @@ using System.Text.Json;
 using Evanto.Mcp.CommandLineHost.Helper;
 using Evanto.Mcp.Host.Factories;
 using Evanto.Mcp.Host.Tests;
+using Evanto.Mcp.Common.Settings;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace Evanto.Mcp.CommandLineHost;
 
@@ -32,6 +37,20 @@ public class Program
         var rootConfig              = AppHelper.LoadConfiguration(args);
         var (logger, loggerFactory) = AppHelper.GetLogger(rootConfig);
 
+        // 2. Configure OpenTelemetry if enabled (either from config or command line)
+        TracerProvider? tracerProvider = null;
+
+        var telemetryEnabled = rootConfig.Telemetry.Enabled || rootConfig.EnableTelemetry;
+        if (telemetryEnabled)
+        {   // override telemetry enabled flag if command line option was used
+            if (rootConfig.EnableTelemetry)
+            {
+                rootConfig.Telemetry.Enabled = true;
+            }
+
+            tracerProvider = AppHelper.ConfigureOpenTelemetry(rootConfig, logger);
+        }
+
         if (args.Contains("--list"))
         {   // List available providers and exit
             AppHelper.ShowAvailableProviders(rootConfig);
@@ -39,7 +58,7 @@ public class Program
         }
 
         try
-        {   // 2. Create MCP clients from configuration
+        {   // 3. Create MCP clients from configuration
             var mcpClients = await EvMcpClientFactory.CreateMcpClientsAsync(rootConfig, logger);
 
             if (!mcpClients.Any())
@@ -52,13 +71,13 @@ public class Program
 
             logger.LogInformation($"✅ Total available tools: {allTools.Count}");
 
-            // 3. Test MCP tools directly (only if --test parameter is provided)
+            // 4. Test MCP tools directly (only if --test parameter is provided)
             if (rootConfig.RunTests && mcpClients.Any())
             {
                 await EvMcpServerTester.TestAllMcpServersAsync(logger, rootConfig, mcpClients);
             }
 
-            // 4. Chat Client Integration with configurable Provider
+            // 5. Chat Client Integration with configurable Provider
             logger.LogInformation("🤖 Creating chat client provider from configuration...");
 
             try
@@ -101,5 +120,11 @@ public class Program
             logger.LogError(ex, "❌ An error occurred while running the MCP client");
             Console.WriteLine($"Error: {ex.Message}");
         }
+
+        finally
+        {   // Clean up OpenTelemetry resources
+            tracerProvider?.Dispose();
+        }
     }
+
 }
