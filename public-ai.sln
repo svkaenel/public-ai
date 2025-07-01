@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".doc", ".doc", "{A8DCE0F2-2
 		CodingRules.md = CodingRules.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Tools.SupportWizard", "lib\Evanto.Mcp.Tools.SupportWizard\Evanto.Mcp.Tools.SupportWizard.csproj", "{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{6A7F517E-9311-1FC0-2BC7-62D58192D65E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A7F517E-9311-1FC0-2BC7-62D58192D65E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A7F517E-9311-1FC0-2BC7-62D58192D65E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +50,7 @@ Global
 		{27ABB744-E763-9858-6C91-3CD4018C7ED8} = {F95F473B-E98A-ACD6-1986-755F447BE36F}
 		{52D5F4BB-F385-1337-F71E-376D3BFA0F71} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 		{6A7F517E-9311-1FC0-2BC7-62D58192D65E} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
+		{A2CC0F66-B503-4C5C-B30B-CAC66C99668A} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77925787-747F-4405-88C9-232E967B9207}

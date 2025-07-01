@@ -172,6 +172,24 @@ public ViewResult EmailConfirmation(Guid userGuid)
 
 ```
 
+### Guard clauses for methods
+
+- Add guard clauses for each method parameter
+- Use the following syntax:
+
+Prefer:
+
+```C#
+ArgumentException.ThrowIfNullOrEmpty(customerEmail, nameof(customerEmail));
+```
+
+Avoid if possible:
+
+```C#
+if (String.IsNullOrWhiteSpace(customerEmail))
+    throw new ArgumentException("Customer email cannot be null or empty", nameof(customerEmail));
+```
+
 ### Namespace for classes
 
 1. Please use the short form:
