@@ -36,9 +36,6 @@ public class Program
         builder.Services
             .AddSupportWizardServices();
 
-        ConfigureLoggingForWeb(builder.Logging);
-
-        // For SSE support, we'll use a different approach
         builder.Services
             .AddMcpServer()
             .WithHttpTransport()
@@ -46,8 +43,18 @@ public class Program
 
         var app = builder.Build();
 
+        if (settings.AutoMigrateDatabase)
+        {
+            // Automatically migrate the database if configured
+            if (!app.MigrateDatabase())
+            {
+                logger.LogError("Failed to migrate the database. Please check your configuration.");
+                return;
+            }
+        }
+
         // Test DB access
-        if (!await TestDatabaseConnections(app)) return;
+        if (!await app.TestSupportWizardAccessAsync()) return;
 
         app.MapMcp();
 
@@ -64,49 +71,4 @@ public class Program
         await app.RunAsync();
     }
 
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Configures logging for web application with normal output. </summary>
-    ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
-    ///
-    /// <param name="logging">  The logging builder. </param>
-    ///-------------------------------------------------------------------------------------------------
-    private static void ConfigureLoggingForWeb(ILoggingBuilder logging)
-    {
-        // For web applications, we can use normal logging
-        logging.AddConsole();
-        logging.AddDebug();
-
-        // Still suppress some verbose Entity Framework logging
-        logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
-        logging.AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning);
-    }
-
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Tests database connections silently. </summary>
-    ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
-    ///
-    /// <param name="app">  The application. </param>
-    ///
-    /// <returns>   True if all database connections are successful, false otherwise. </returns>
-    ///-------------------------------------------------------------------------------------------------
-    private static async Task<Boolean> TestDatabaseConnections(Object app)
-    {
-        // Test DB access silently for MCP compatibility (no output to avoid JSON protocol interference)
-        if (app is WebApplication webApp)
-        {
-            if (!await webApp.TestSupportWizardAccessAsync()) return false;
-            // if (!await webApp.TestPrDocAccessAsync()) return false;
-        }
-
-        else if (app is IHost host)
-        {
-            if (!await host.TestSupportWizardAccessAsync()) return false;
-            // if (!await host.TestPrDocAccessAsync()) return false;
-        }
-
-        return true;
-    }
-
-}
+ }

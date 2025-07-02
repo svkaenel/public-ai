@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  sse-mcp-server:
+    build:
+      context: .
+      dockerfile: srv/sse-mcp-server/Dockerfile
+    container_name: sse-mcp-server
+    ports:
+      - "${SSE_PORT:-5560}:5560"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5560
+      - ConnectionStrings__SupportWizardDB=Filename=/app/db/ev-supportwizard.db
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    volumes:
+      - "${DB_PATH:-./db}:/app/db"
+      - "${SSE_CONFIG_PATH:-./srv/sse-mcp-server/appsettings.json}:/app/appsettings.json:ro"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5560/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    networks:
+      - mcp-network
+
+  stdio-mcp-server:
+    build:
+      context: .
+      dockerfile: srv/stdio-mcp-server/Dockerfile
+    container_name: stdio-mcp-server
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__SupportWizardDB=Filename=/app/db/ev-supportwizard.db
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    volumes:
+      - "${DB_PATH:-./db}:/app/db"
+      - "${STDIO_CONFIG_PATH:-./srv/stdio-mcp-server/appsettings.json}:/app/appsettings.json:ro"
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
+
+volumes:
+  mcp-data:
+    driver: local

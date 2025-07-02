@@ -34,10 +34,17 @@ This is an **MCP (Model Context Protocol) Host System** that integrates multiple
 
 ### Core Components
 
-**Three-Layer Architecture:**
-1. **cmd-mcp-host** (app/) - Console application entry point
-2. **Evanto.Mcp.Host** (lib/) - Core MCP hosting logic and factories
-3. **Evanto.Mcp.Common** (lib/) - Shared configuration and settings
+**Multi-Layer Architecture:**
+1. **cmd-mcp-host** (app/) - Console application entry point with interactive chat interface
+2. **Evanto.Mcp.Host** (lib/) - Core MCP hosting logic, factories, and testing framework
+3. **Evanto.Mcp.Common** (lib/) - Shared configuration, settings, and common utilities
+4. **Evanto.Mcp.Apps** (lib/) - Application helper services and shared app functionality
+5. **MCP Tool Libraries** (lib/) - Specialized tool implementations:
+   - **Evanto.Mcp.Tools.SupportWizard** - Support request tracking with SQLite database
+   - **Evanto.Mcp.Tools.SupportDocs** - Support documentation management tools
+6. **MCP Server Implementations** (srv/) - Standalone MCP servers:
+   - **sse-mcp-server** - SSE transport-based MCP server
+   - **stdio-mcp-server** - STDIO transport-based MCP server
 
 ### Key System Workflows
 
@@ -64,6 +71,12 @@ This is an **MCP (Model Context Protocol) Host System** that integrates multiple
 - Automatic parameter generation based on JSON schemas
 - Configurable test scenarios with timeouts
 - Detailed result reporting with success/failure metrics
+
+### Database Integration
+- **SQLite Support**: Local database storage for SupportWizard tools
+- **Entity Framework Core**: Database abstraction with Code-First migrations
+- **Guid Primary Keys**: All entities use System.Guid for better security and uniqueness
+- **Database Location**: `db/ev-supportwizard.db` for SupportWizard data persistence
 
 ## Important Configuration
 
@@ -92,6 +105,12 @@ Each MCP server requires:
 - `TimeoutSeconds`: Connection timeout
 - `ToolTests`: Optional testing configuration per tool
 
+### Database Configuration
+For SupportWizard and other database-enabled tools:
+- `ConnectionStrings.SupportWizard`: SQLite connection string
+- Automatic database creation and migration on first run
+- Configurable through appsettings.json or environment variables
+
 ## Development Notes
 
 - Important: Always apply the coding rules defined in CodingRules.md when creating or modifying source code 
@@ -109,7 +128,47 @@ Each MCP server requires:
 
 ## Key Dependencies
 - `Microsoft.Extensions.AI.*`: AI provider abstractions with built-in OpenTelemetry support
-- `ModelContextProtocol`: Official MCP client library
+- `ModelContextProtocol`: Official MCP client library for protocol implementation
+- `ModelContextProtocol.AspNetCore`: MCP server-side tools and attributes
 - `OpenTelemetry.*`: Observability and telemetry collection
-- `Spectre.Console`: Rich console output
+- `Microsoft.EntityFrameworkCore.Sqlite`: SQLite database provider for local storage
+- `Spectre.Console`: Rich console output and formatting
 - `BoxOfYellow.ConsoleMarkdownRenderer`: Markdown rendering in console
+
+## Project Structure
+```
+public-ai/
+├── app/
+│   └── cmd-mcp-host/                    # Main console application
+├── lib/
+│   ├── Evanto.Mcp.Common/               # Shared settings and utilities
+│   ├── Evanto.Mcp.Host/                 # Core MCP hosting logic
+│   ├── Evanto.Mcp.Apps/                 # Application helper services
+│   ├── Evanto.Mcp.Tools.SupportWizard/ # Support ticket tracking system
+│   └── Evanto.Mcp.Tools.SupportDocs/   # Documentation management tools
+├── srv/
+│   ├── sse-mcp-server/                  # SSE-based MCP server
+│   └── stdio-mcp-server/                # STDIO-based MCP server
+├── db/
+│   └── ev-supportwizard.db              # SQLite database files
+└── .doc/
+    ├── CLAUDE.md                        # This documentation file
+    ├── CodingRules.md                   # C# coding standards
+    └── Directory.Packages.props         # Central package management
+```
+
+## SupportWizard Tool Overview
+The SupportWizard system provides comprehensive support request tracking:
+
+### Features
+- **Create Support Requests**: Customer email, name, channel, subject, description, topic, priority
+- **Assign to Users**: Route tickets to appropriate support staff based on expertise
+- **Status Management**: Track progress from New → InProgress → Resolved → Closed
+- **Search & Filter**: Find tickets by customer, status, topic, priority, assignee
+- **User Management**: Manage support staff and their topic specializations
+
+### Database Schema
+- **SupportRequests Table**: Main ticket tracking with Guid primary keys
+- **Users Table**: Support staff with topic assignments
+- **Automatic Timestamps**: CreatedAt, UpdatedAt, ResolvedAt tracking
+- **Foreign Key Relations**: Proper referential integrity between tables

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>pr_mcp</RootNamespace>
+    <RootNamespace>Evanto.Mcp.Server.Stdio</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -21,13 +21,6 @@
     <ContainerFamily>alpine</ContainerFamily>
     <RuntimeIdentifiers>linux-x64;linux-arm64</RuntimeIdentifiers>
 </PropertyGroup>
-
-<ItemGroup>
-  <!-- Treat appsettings.json as content and copy if changed -->
-  <None Include="Config/appsettings.json">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </None>
-</ItemGroup>
 
 <ItemGroup>
   <ProjectReference Include="../../lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj" />

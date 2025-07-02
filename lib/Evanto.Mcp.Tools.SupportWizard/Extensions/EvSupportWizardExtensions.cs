@@ -4,6 +4,7 @@ using Evanto.Mcp.Tools.SupportWizard.Context;
 using Evanto.Mcp.Tools.SupportWizard.Contracts;
 using Evanto.Mcp.Tools.SupportWizard.Repository;
 using Evanto.Mcp.Tools.SupportWizard.Tools;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,14 +61,14 @@ public static class EvSupportWizardExtensions
     {   // check requirements
         ArgumentNullException.ThrowIfNull("Host application builder must be valid!");
 
-        var connectWizard = builder.Configuration.GetConnectionString("SupportWizardDB");
+        var connectDB = builder.Configuration.GetConnectionString("SupportWizardDB");
 
         ArgumentException.ThrowIfNullOrEmpty("Support wizard connection string must be valid!");
 
         // add mybrunner + zbv database with minimal logging
-        builder.Services.AddDbContext<SupportWizardContext>(options =>
+        builder.Services.AddDbContext<SupportWizardDbContext>(options =>
         {
-            options.UseSqlite(connectWizard);
+            options.UseSqlite(connectDB);
             // Disable sensitive data logging and detailed errors for production
             options.EnableSensitiveDataLogging(false);
             options.EnableDetailedErrors(false);
@@ -77,7 +78,7 @@ public static class EvSupportWizardExtensions
 
         return builder;
     }
-    
+
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Tests the brunner product registration database access. </summary>
     ///
@@ -99,17 +100,50 @@ public static class EvSupportWizardExtensions
                 return false;
             }
 
-            var users        = await repository.GetAllUsersAsync();
-            var ok           = users.Count() >= 0;
+            var users = await repository.GetAllUsersAsync();
+            var ok = users.Count() >= 0;
 
             return ok;
         }
 
         catch (Exception ex)
-        {   
+        {
             Console.Error.WriteLine($"Error testing Support Wizard DB access: {ex.Message}");
         }
 
         return false;
     }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>	Migrate database. </summary>
+    ///
+    /// <remarks>	SvK, 20.02.2024. </remarks>
+    ///
+    /// <param name="app">	The application. </param>
+    ///
+    /// <returns>	True if it succeeds, false if it fails. </returns>
+    ///-------------------------------------------------------------------------------------------------
+
+    public static Boolean MigrateDatabase(this IHost app)
+    {
+        try
+        {   // check if database connection is available
+            var context = app.Services.CreateScope().ServiceProvider.GetService<SupportWizardDbContext>();
+            if (context == null)
+            {
+                return false;
+            }
+
+            context.Database.Migrate();
+
+            return true;
+        }
+
+        catch (Exception ex)
+        {
+            Console.WriteLine("Migrating database failed!", ex.Message);
+            return false;
+        }
+    }
+
 }

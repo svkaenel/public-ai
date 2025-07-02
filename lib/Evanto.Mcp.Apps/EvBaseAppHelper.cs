@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -132,6 +133,9 @@ public class EvBaseAppHelper
                     options.TimestampFormat = "HH:mm:ss ";  // Custom timestamp format
                 });
             }
+
+            // Add debug logging for VS Code or K8S / Docker environments
+            builder.AddDebug(); 
 
             if (rootConfig.Telemetry.Enabled && rootConfig.Telemetry.EnableLogging)
             {   // Add OpenTelemetry logging

@@ -13,7 +13,7 @@ namespace Evanto.Mcp.Tools.SupportWizard.Repository;
 ///-------------------------------------------------------------------------------------------------
 public class SupportWizardRepository : ISupportWizardRepository
 {
-    private readonly SupportWizardContext               mContext;
+    private readonly SupportWizardDbContext               mContext;
     private readonly ILogger<SupportWizardRepository>   mLogger;
 
     ///-------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ public class SupportWizardRepository : ISupportWizardRepository
     /// <param name="context"> The database context. </param>
     /// <param name="logger">  The logger. </param>
     ///-------------------------------------------------------------------------------------------------
-    public SupportWizardRepository(SupportWizardContext context, ILogger<SupportWizardRepository> logger)
+    public SupportWizardRepository(SupportWizardDbContext context, ILogger<SupportWizardRepository> logger)
     {
         mContext = context ?? throw new ArgumentNullException(nameof(context));
         mLogger  = logger ?? throw new ArgumentNullException(nameof(logger));

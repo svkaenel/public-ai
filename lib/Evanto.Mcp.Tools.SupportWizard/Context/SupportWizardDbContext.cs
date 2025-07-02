@@ -9,29 +9,15 @@ namespace Evanto.Mcp.Tools.SupportWizard.Context;
 ///
 /// <remarks>   SvK, 01.07.2025. </remarks>
 ///-------------------------------------------------------------------------------------------------
-public class SupportWizardContext : DbContext
+public class SupportWizardDbContext : DbContext
 {
-    private readonly IConfiguration? mConfiguration;
-
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Default constructor. </summary>
     ///
     /// <remarks>   SvK, 01.07.2025. </remarks>
     ///-------------------------------------------------------------------------------------------------
-    public SupportWizardContext()
+    public SupportWizardDbContext()
     {
-    }
-
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Constructor with configuration. </summary>
-    ///
-    /// <remarks>   SvK, 01.07.2025. </remarks>
-    ///
-    /// <param name="configuration"> The configuration. </param>
-    ///-------------------------------------------------------------------------------------------------
-    public SupportWizardContext(IConfiguration configuration)
-    {
-        mConfiguration = configuration;
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -41,7 +27,7 @@ public class SupportWizardContext : DbContext
     ///
     /// <param name="options"> The options. </param>
     ///-------------------------------------------------------------------------------------------------
-    public SupportWizardContext(DbContextOptions<SupportWizardContext> options) : base(options)
+    public SupportWizardDbContext(DbContextOptions<SupportWizardDbContext> options) : base(options)
     {
     }
 
@@ -66,27 +52,40 @@ public class SupportWizardContext : DbContext
     ///
     /// <param name="optionsBuilder"> The options builder. </param>
     ///-------------------------------------------------------------------------------------------------
+    /* optionally
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (String.IsNullOrWhiteSpace(environment))
+            {   // if not in ASP.NET context
+                environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+            }
+
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.json")
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .Build();
+
             // Default connection string for migrations
-            var connectionString = mConfiguration?.GetConnectionString("SupportWizard") 
+            var connectionString = configuration?.GetConnectionString("SupportWizardDB")
                 ?? "Data Source=SupportWizard.db";
-            
+
             optionsBuilder.UseSqlite(connectionString, options =>
             {
                 options.CommandTimeout(30);
             });
-            
+
             // Enable detailed logging in development
-            #if DEBUG
+#if DEBUG
             optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.LogTo(Console.WriteLine);
-            #endif
+#endif
         }
     }
-
+    */
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Configure the model. </summary>
     ///
