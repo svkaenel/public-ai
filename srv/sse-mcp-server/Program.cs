@@ -44,17 +44,18 @@ public class Program
         var app = builder.Build();
 
         if (settings.AutoMigrateDatabase)
-        {
-            // Automatically migrate the database if configured
+        {   // Automatically migrate the database if configured
             if (!app.MigrateDatabase())
-            {
+            {   // Failed to migrate the database
                 logger.LogError("Failed to migrate the database. Please check your configuration.");
-                return;
+                // return;
             }
         }
-
-        // Test DB access
-        if (!await app.TestSupportWizardAccessAsync()) return;
+        
+        if (!await app.TestSupportWizardAccessAsync())
+        {   // Test DB access failed
+            logger.LogError("Failed to access the database. Please check your configuration.");
+        }
 
         app.MapMcp();
 

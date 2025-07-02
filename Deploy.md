@@ -16,3 +16,12 @@
 
   ## Monitor logs
   docker-compose logs -f
+
+  ## Auflisten aktuelle Umgebungsvariablen
+
+  docker compose config --environment
+
+  ## Aufräumen
+
+  docker system prune -a -f
+  docker builder prune -f

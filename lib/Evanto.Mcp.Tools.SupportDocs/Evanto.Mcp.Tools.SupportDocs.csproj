@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Brunner.Mcp.Settings/Brunner.Mcp.Settings.csproj" />
     <ProjectReference Include="../Evanto.Mcp.Common/Evanto.Mcp.Common.csproj" />
   </ItemGroup>
 

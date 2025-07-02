@@ -4,14 +4,22 @@ This document explains how to deploy the MCP servers using Docker and Docker Com
 
 ## Quick Start
 
-1. **Copy environment configuration:**
+1. **Setup permissions and configuration:**
    ```bash
+   # Run the setup script to create directories and set permissions
+   ./setup-permissions.sh
+   
+   # Copy environment configuration
    cp .env.example .env
    ```
 
 2. **Start both MCP servers:**
    ```bash
-   docker-compose up -d
+   # For Apple Silicon Macs (M1/M2/M3) - default
+   docker-compose up --build -d
+   
+   # For Intel Macs (if needed)
+   docker-compose -f docker-compose-intel.yml up --build -d
    ```
 
 3. **View logs:**
@@ -79,12 +87,25 @@ docker-compose restart sse-mcp-server
 To build the Docker images manually:
 
 ```bash
-# Build SSE MCP Server
+# Build for current platform (recommended)
 docker build -f srv/sse-mcp-server/Dockerfile -t sse-mcp-server .
-
-# Build STDIO MCP Server
 docker build -f srv/stdio-mcp-server/Dockerfile -t stdio-mcp-server .
+
+# Build for specific platform (if needed)
+docker build --platform linux/arm64 -f srv/sse-mcp-server/Dockerfile -t sse-mcp-server .
+docker build --platform linux/amd64 -f srv/sse-mcp-server/Dockerfile -t sse-mcp-server .
+
+# Build multi-architecture images
+docker buildx build --platform linux/amd64,linux/arm64 -f srv/sse-mcp-server/Dockerfile -t sse-mcp-server .
 ```
+
+### Apple Silicon Mac Support
+
+The Dockerfiles automatically detect your Mac's architecture and build the appropriate binaries:
+- **Apple Silicon (M1/M2/M3)**: Builds `linux-arm64` binaries
+- **Intel Mac**: Builds `linux-x64` binaries
+
+No additional configuration is needed - Docker will automatically use the correct architecture.
 
 ## Network
 

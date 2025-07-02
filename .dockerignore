@@ -1,0 +1,52 @@
+# Ignore build artifacts and cache directories
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/packages/
+
+# Ignore git files
+.git/
+.gitignore
+.gitattributes
+
+# Ignore Docker files to prevent recursion
+**/Dockerfile
+**/docker-compose*.yml
+**/.dockerignore
+
+# Ignore temporary files
+**/.tmp/
+**/temp/
+**/*.tmp
+**/*.temp
+
+# Ignore logs
+**/*.log
+**/logs/
+
+# Ignore test results
+**/TestResults/
+**/coverage/
+
+# Ignore user-specific files
+**/.user
+**/*.user
+**/.suo
+**/*.suo
+
+# Ignore database files (will be mounted)
+**/db/*.db
+**/db/*.db-*
+
+# Ignore environment files
+**/.env
+**/.env.local
+
+# Ignore documentation that's not needed in container
+**/README*.md
+**/docs/
+
+# Ignore IDE configurations
+**/.idea/
+**/.fleet/
