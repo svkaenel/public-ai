@@ -10,19 +10,22 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="Qdrant.Client" />
     <PackageReference Include="itext7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
-    <PackageReference Include="Serilog.Extensions.Hosting" />
-    <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Serilog.Settings.Configuration" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj" />
     <ProjectReference Include="../../lib/Evanto.Mcp.Common/Evanto.Mcp.Common.csproj" />
     <ProjectReference Include="../../lib/Evanto.Mcp.Embeddings/Evanto.Mcp.Embeddings.csproj" />
   </ItemGroup>
 
-  </Project>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

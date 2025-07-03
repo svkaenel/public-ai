@@ -1,5 +1,10 @@
 namespace Evanto.Mcp.Vectorize.Models;
 
+///-------------------------------------------------------------------------------------------------
+/// <summary>   Document record for vector storage. </summary>
+///
+/// <remarks>   SvK, 03.07.2025. </remarks>
+///-------------------------------------------------------------------------------------------------
 public class EvDocumentRecord
 {
     public required String                      Id              { get; set; }

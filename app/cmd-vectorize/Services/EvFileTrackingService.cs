@@ -10,33 +10,33 @@ namespace Evanto.Mcp.Vectorize.Services;
 ///-------------------------------------------------------------------------------------------------
 /// <summary>   Service for tracking processed files to avoid redundant processing. </summary>
 ///
-/// <remarks>   SvK, 26.05.2025. </remarks>
+/// <remarks>   SvK, 03.07.2025. </remarks>
 ///-------------------------------------------------------------------------------------------------
 public class EvFileTrackingService(
     IOptions<EvVectorizeAppSettings>     config,
-    ILogger<EvFileTrackingService>   logger) : IEvFileTrackingService
+    ILogger<EvFileTrackingService>       logger) : IEvFileTrackingService
 {
-    private readonly EvVectorizeAppSettings                       mConfig             = config.Value;
-    private readonly ILogger<EvFileTrackingService>           mLogger             = logger;
-    private readonly Dictionary<String, String>             mProcessedFiles     = []; // Use collection expression
+    private readonly EvVectorizeAppSettings               mConfig             = config.Value;
+    private readonly ILogger<EvFileTrackingService>       mLogger             = logger;
+    private readonly Dictionary<String, String>          mProcessedFiles      = []; // use collection expression
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Gets a set of all processed file names. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <returns>   A HashSet of processed file names. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<HashSet<String>> GetProcessedFilesAsync()
     {   // load tracking data and return processed file names
         await LoadTrackingDataAsync();
-        return new HashSet<String>(mProcessedFiles.Keys); // Ensure new HashSet is created
+        return new HashSet<String>(mProcessedFiles.Keys); // ensure new HashSet is created
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Adds a file to the list of processed files. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="filePath">   The path to the processed file. </param>
     /// <param name="fileHash">   The hash of the processed file. </param>
@@ -51,13 +51,14 @@ public class EvFileTrackingService(
         mProcessedFiles[fileName]   = fileHash;
         
         await SaveTrackingDataAsync();
+
         mLogger.LogDebug("Added processed file: {FileName} with hash: {Hash}", fileName, fileHash);
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Checks if a file has already been processed with the same hash. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="filePath">   The path to the file. </param>
     /// <param name="fileHash">   The hash of the file. </param>
@@ -69,13 +70,14 @@ public class EvFileTrackingService(
         await LoadTrackingDataAsync();
         
         var fileName = Path.GetFileName(filePath);
+
         return mProcessedFiles.TryGetValue(fileName, out var existingHash) && existingHash == fileHash;
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Calculates the SHA256 hash of a file. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="filePath">   The path to the file. </param>
     ///
@@ -87,13 +89,14 @@ public class EvFileTrackingService(
         using var stream    = File.OpenRead(filePath);
         
         var hashBytes       = sha256.ComputeHash(stream);
+
         return Convert.ToHexString(hashBytes);
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Loads tracking data from the configured file path. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///-------------------------------------------------------------------------------------------------
     private async Task LoadTrackingDataAsync()
     {   // load tracking data from file
@@ -111,11 +114,8 @@ public class EvFileTrackingService(
                     {
                         mProcessedFiles[kvp.Key] = kvp.Value;
                     }
-
                 }
-
             }
-
         }
 
         catch (Exception ex)
@@ -127,7 +127,7 @@ public class EvFileTrackingService(
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Saves the current tracking data to the configured file path. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///-------------------------------------------------------------------------------------------------
     private async Task SaveTrackingDataAsync()
     {   // save tracking data to file
@@ -151,8 +151,7 @@ public class EvFileTrackingService(
         catch (Exception ex)
         {   // log error on save failure
             mLogger.LogError(ex, "Failed to save tracking data to {Path}", mConfig.TrackingFilePath);
-            // Consider re-throwing or handling more gracefully depending on requirements
+            // consider re-throwing or handling more gracefully depending on requirements
         }
     }
-
 }

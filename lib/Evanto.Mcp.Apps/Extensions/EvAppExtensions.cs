@@ -74,4 +74,23 @@ public static class EvAppExtensions
 
         return filteredText.Trim();
     }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     Resolves a relative path against the current working directory.
+    /// </summary>
+    /// 
+    /// <remarks>SvK, 03.06.2025.</remarks>
+    /// 
+    /// <param name="relativePath"> The relative path to resolve. </param>
+    /// <param name="basePath">     Optional base path to resolve against. Defaults to
+    ///                             the current working directory if not provided.</param>
+    /// 
+    /// <returns>   The absolute path resolved from the relative path. </returns>
+    ///-------------------------------------------------------------------------------------------------
+    public static String ResolveRelative(this String relativePath, String? basePath = null)
+    {
+        basePath ??= Directory.GetCurrentDirectory();
+        return Path.GetFullPath(relativePath, basePath);
+    }
 }

@@ -7,17 +7,22 @@ using System.Globalization;
 
 namespace Evanto.Mcp.Vectorize.Services;
 
+///-------------------------------------------------------------------------------------------------
+/// <summary>   Vector store service implementation using Qdrant. </summary>
+///
+/// <remarks>   SvK, 03.07.2025. </remarks>
+///-------------------------------------------------------------------------------------------------
 public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorStoreService> logger) : IEvVectorStoreService, IDisposable
 {
     private readonly QdrantClient                           mQdrantClient       = new QdrantClient(settings?.QdrantEndpoint ?? throw new ArgumentNullException(nameof(settings)), settings?.QdrantPort ?? 6334);
     private readonly EvQdrantSettings                       mSettings           = settings ?? throw new ArgumentNullException(nameof(settings));
-    private readonly ILogger<EvVectorStoreService>            mLogger             = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<EvVectorStoreService>          mLogger             = logger ?? throw new ArgumentNullException(nameof(logger));
     private          Boolean                                mDisposed           = false;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Initialize vector store asynchronously. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <returns>   A Task representing the asynchronous operation. </returns>
     ///-------------------------------------------------------------------------------------------------
@@ -34,7 +39,7 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
                 
                 await mQdrantClient.CreateCollectionAsync(mSettings.VectorCollectionName, new VectorParams
                 {
-                    Size     = 768, // nomic-text-embed embedding size - consider making this configurable
+                    Size     = mSettings.VectorDimension,
                     Distance = Distance.Cosine
                 });
                 
@@ -53,13 +58,12 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
             mLogger.LogError(ex, "Failed to initialize vector store");
             throw new InvalidOperationException("Vector store initialization failed", ex);
         }
-
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Check if document exists asynchronously. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="documentId">   Identifier for the document. </param>
     ///
@@ -91,7 +95,7 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Store document asynchronously. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="document">   The document to store. </param>
     ///
@@ -123,7 +127,7 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Store multiple documents asynchronously. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="documents">   The documents to store. </param>
     ///
@@ -159,7 +163,7 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Search similar documents asynchronously. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="queryVector">   The query vector. </param>
     /// <param name="limit">         The maximum number of results. </param>
@@ -201,7 +205,7 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Create point from document for vector storage. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="document">   The document to convert. </param>
     ///
@@ -230,7 +234,7 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Create document from search result. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="result">   The search result to convert. </param>
     ///
@@ -258,18 +262,31 @@ public class EvVectorStoreService(EvQdrantSettings settings, ILogger<EvVectorSto
         };
     }
 
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Dispose resources. </summary>
+    ///
+    /// <remarks>   SvK, 03.07.2025. </remarks>
+    ///-------------------------------------------------------------------------------------------------
     public void Dispose()
-    {
+    {   // dispose managed resources
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
-    {
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Protected dispose pattern implementation. </summary>
+    ///
+    /// <remarks>   SvK, 03.07.2025. </remarks>
+    ///
+    /// <param name="disposing">   True to release both managed and unmanaged resources; false to release only unmanaged resources. </param>
+    ///-------------------------------------------------------------------------------------------------
+    protected virtual void Dispose(Boolean disposing)
+    {   // dispose pattern implementation
         if (!mDisposed && disposing)
-        {
+        {   // dispose managed resources
             mQdrantClient?.Dispose();
             mDisposed = true;
         }
+
     }
 }

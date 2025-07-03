@@ -6,11 +6,24 @@ using Evanto.Mcp.Embeddings.Contracts;
 
 namespace Evanto.Mcp.Vectorize.Extensions;
 
+///-------------------------------------------------------------------------------------------------
+/// <summary>   Extension methods for vectorization services registration. </summary>
+///
+/// <remarks>   SvK, 03.07.2025. </remarks>
+///-------------------------------------------------------------------------------------------------
 public static class EvVectorizeAppExtensions
 {
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Adds PDF vectorization services to the service collection. </summary>
+    ///
+    /// <remarks>   SvK, 03.07.2025. </remarks>
+    ///
+    /// <param name="services">   The service collection. </param>
+    ///
+    /// <returns>   The service collection for chaining. </returns>
+    ///-------------------------------------------------------------------------------------------------
     public static IServiceCollection AddPdfVectorizationServices(this IServiceCollection services)
-    {
-        // Register services
+    {   // register all vectorization services
         services.AddScoped<IEvPdfTextExtractor, EvPdfTextExtractor>();
         services.AddScoped<IEvEmbeddingService, EvEmbeddingService>();
         services.AddScoped<IEvVectorStoreService, EvVectorStoreService>();

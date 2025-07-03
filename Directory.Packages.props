@@ -17,7 +17,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.5" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.6.0" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.5.0-preview.1.25265.7" />
     <PackageVersion Include="Microsoft.Extensions.AI.Ollama" Version="9.5.0-preview.1.25265.7" />
@@ -28,9 +28,6 @@
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
     <PackageVersion Include="ModelContextProtocol" Version="0.3.0-preview.1" />
     <PackageVersion Include="OllamaSharp" Version="5.1.19" />
-    <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" /> 
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
     <PackageVersion Include="Qdrant.Client" Version="1.14.0" />
     <PackageVersion Include="itext7" Version="9.2.0" />
     <PackageVersion Include="BoxOfYellow.ConsoleMarkdownRenderer" Version="0.7.1" />
@@ -40,7 +37,6 @@
     <PackageVersion Include="xunit" Version="2.4.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageVersion Include="Bogus" Version="35.6.1" />
     <PackageVersion Include="System.ClientModel.Primitives" Version="1.2.1" />
     <PackageVersion Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
     <PackageVersion Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.5.0-preview.1.25262.9" />

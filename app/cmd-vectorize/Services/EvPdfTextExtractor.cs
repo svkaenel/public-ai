@@ -6,14 +6,19 @@ using System.Text; // Required for StringBuilder
 
 namespace Evanto.Mcp.Vectorize.Services;
 
+///-------------------------------------------------------------------------------------------------
+/// <summary>   PDF text extraction service implementation. </summary>
+///
+/// <remarks>   SvK, 03.07.2025. </remarks>
+///-------------------------------------------------------------------------------------------------
 public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfTextExtractor
 {
-    private readonly ILogger<EvPdfTextExtractor> mLogger = logger;
+    private readonly ILogger<EvPdfTextExtractor>    mLogger     = logger;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Extract text asynchronously from PDF file. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="filePath">   Full pathname of the PDF file. </param>
     ///
@@ -22,7 +27,7 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
     public async Task<String> ExtractTextAsync(String filePath)
     {   // extract text from PDF using iText library
         try
-        {
+        {   // run text extraction in task
             return await Task.Run(() =>
             {   // open PDF document
                 using var reader   = new PdfReader(filePath);
@@ -31,14 +36,14 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
                 var text = new StringBuilder();
                 
                 // extract text from each page
-                for (Int32 i = 1; i <= document.GetNumberOfPages(); i++)
-                {
+                for (var i = 1; i <= document.GetNumberOfPages(); i++)
+                {   // process each page
                     var page = document.GetPage(i);
                     
-                    // Use LocationTextExtractionStrategy for better text extraction
+                    // use LocationTextExtractionStrategy for better text extraction
                     var strategy = new LocationTextExtractionStrategy();
                     
-                    // Extract text from page using iText's PdfTextExtractor
+                    // extract text from page using iText's PdfTextExtractor
                     var pageText = iText.Kernel.Pdf.Canvas.Parser.PdfTextExtractor.GetTextFromPage(page, strategy);
                     
                     text.AppendLine(pageText);
@@ -49,16 +54,17 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
         }
 
         catch (Exception ex)
-        {
+        {   // log error and rethrow
             mLogger.LogError(ex, "Failed to extract text from PDF: {FilePath}", filePath);
-            throw; // Re-throw to be handled by caller
+            throw; // re-throw to be handled by caller
         }
+
     }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Chunk text into smaller pieces with overlap. </summary>
     ///
-    /// <remarks>   SvK, 26.05.2025. </remarks>
+    /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="text">       The text to chunk. </param>
     /// <param name="chunkSize">  Size of each chunk. </param>
@@ -71,12 +77,12 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
         var chunks = new List<String>();
         
         if (String.IsNullOrWhiteSpace(text))
-            return chunks; // Return empty list for null or empty text
+            return chunks; // return empty list for null or empty text
 
-        // Clean up the text first
+        // clean up the text first
         text = text.Replace("\r\n", "\n").Replace("\r", "\n");
         
-        // Split by sentences for better chunking
+        // split by sentences for better chunking
         var sentences = text.Split(['.', '!', '?'], StringSplitOptions.RemoveEmptyEntries)
                            .Select(s => s.Trim())
                            .Where(s => !String.IsNullOrEmpty(s))
@@ -101,32 +107,33 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
         var currentChunkSize = 0;
 
         foreach (var sentence in sentences)
-        {
+        {   // process each sentence
             var sentenceLength = sentence.Length + 1; // +1 for space/punctuation
             
-            // Check if adding this sentence would exceed chunk size
+            // check if adding this sentence would exceed chunk size
             if (currentChunkSize + sentenceLength > chunkSize && currentChunk.Length > 0)
             {   // finalize current chunk
                 chunks.Add(currentChunk.ToString().Trim());
                 
                 // start new chunk with overlap
                 if (overlap > 0)
-                {
+                {   // add overlap from previous chunk
                     var overlapText = GetOverlapText(currentChunk.ToString(), overlap);
                     currentChunk     = new StringBuilder(overlapText);
                     currentChunkSize = overlapText.Length;
                 }
 
                 else
-                {
+                {   // no overlap
                     currentChunk.Clear();
                     currentChunkSize = 0;
                 }
+
             }
             
-            // Add sentence to current chunk
+            // add sentence to current chunk
             if (currentChunk.Length > 0)
-            {
+            {   // add separator space
                 currentChunk.Append(" ");
                 currentChunkSize++;
             }
@@ -135,50 +142,58 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
             currentChunkSize += sentence.Length;
         }
 
-        // Add final chunk if not empty
+        // add final chunk if not empty
         if (currentChunk.Length > 0)
-        {
+        {   // add remaining text as final chunk
             chunks.Add(currentChunk.ToString().Trim());
         }
 
         return chunks;
     }
 
-    /// <summary>
-    /// Creates character-based chunks as a fallback method.
-    /// </summary>
-    /// <param name="text">The text to chunk.</param>
-    /// <param name="chunkSize">Size of each chunk.</param>
-    /// <param name="overlap">The overlap between chunks.</param>
-    /// <returns>A list of text chunks.</returns>
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Creates character-based chunks as a fallback method. </summary>
+    ///
+    /// <remarks>   SvK, 03.07.2025. </remarks>
+    ///
+    /// <param name="text">       The text to chunk. </param>
+    /// <param name="chunkSize">  Size of each chunk. </param>
+    /// <param name="overlap">    The overlap between chunks. </param>
+    ///
+    /// <returns>   A list of text chunks. </returns>
+    ///-------------------------------------------------------------------------------------------------
     private static List<String> CreateCharacterBasedChunks(String text, Int32 chunkSize, Int32 overlap)
     {   // fallback method for character-based chunking
         var chunks = new List<String>();
         var start  = 0;
 
         while (start < text.Length)
-        {
+        {   // create chunks based on character positions
             var end    = Math.Min(start + chunkSize, text.Length);
             var chunk  = text.Substring(start, end - start);
             
             chunks.Add(chunk);
             
-            start = Math.Max(start + chunkSize - overlap, start + 1); // Ensure progress
+            start = Math.Max(start + chunkSize - overlap, start + 1); // ensure progress
         }
 
         return chunks;
     }
 
-    /// <summary>
-    /// Gets overlap text from the end of the current chunk.
-    /// </summary>
-    /// <param name="text">The text to get overlap from.</param>
-    /// <param name="overlapSize">The size of the overlap.</param>
-    /// <returns>The overlap text.</returns>
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Gets overlap text from the end of the current chunk. </summary>
+    ///
+    /// <remarks>   SvK, 03.07.2025. </remarks>
+    ///
+    /// <param name="text">        The text to get overlap from. </param>
+    /// <param name="overlapSize"> The size of the overlap. </param>
+    ///
+    /// <returns>   The overlap text. </returns>
+    ///-------------------------------------------------------------------------------------------------
     private static String GetOverlapText(String text, Int32 overlapSize)
     {   // get overlap text from the end of current chunk
         if (text.Length <= overlapSize)
-            return text; // Return entire text if shorter than overlap
+            return text; // return entire text if shorter than overlap
             
         return text.Substring(text.Length - overlapSize);
     }
