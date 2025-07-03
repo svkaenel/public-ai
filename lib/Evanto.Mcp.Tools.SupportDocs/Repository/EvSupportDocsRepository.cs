@@ -4,6 +4,7 @@ using Qdrant.Client.Grpc;
 using Evanto.Mcp.Tools.SupportDocs.Contracts;
 using Evanto.Mcp.Tools.SupportDocs.ViewModels;
 using Evanto.Mcp.Common.Settings;
+using Evanto.Mcp.Embeddings.Contracts;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Repository;
 

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -12,17 +12,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="Qdrant.Client" />
-    <PackageReference Include="ModelContextProtocol" />
-    <PackageReference Include="ModelContextProtocol.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Evanto.Mcp.Common/Evanto.Mcp.Common.csproj" />
-    <ProjectReference Include="../Evanto.Mcp.Embeddings/Evanto.Mcp.Embeddings.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services/" />
   </ItemGroup>
 
 </Project>

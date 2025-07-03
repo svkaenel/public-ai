@@ -3,11 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Evanto.Mcp.Tools.SupportDocs.Contracts;
-using Evanto.Mcp.Tools.SupportDocs.Services;
 using Evanto.Mcp.Tools.SupportDocs.Repository;
 using Microsoft.Extensions.Hosting;
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportDocs.Tools;
+using Evanto.Mcp.Embeddings.Contracts;
+using Evanto.Mcp.Embeddings.Services;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Extensions;
 

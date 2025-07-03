@@ -39,6 +39,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "db", "db", "{240D54FD-C2A2-
 		db\ev-supportwizard.db = db\ev-supportwizard.db
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cmd-vectorize", "app\cmd-vectorize\cmd-vectorize.csproj", "{1D9367DC-DEA6-48B2-949F-A7E520D7BC73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Embeddings", "lib\Evanto.Mcp.Embeddings\Evanto.Mcp.Embeddings.csproj", "{EA264B72-E483-44DB-83DB-30E49C7D646D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +81,14 @@ Global
 		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20DD354E-67FD-46C8-B0BD-34B27130949E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D9367DC-DEA6-48B2-949F-A7E520D7BC73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D9367DC-DEA6-48B2-949F-A7E520D7BC73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D9367DC-DEA6-48B2-949F-A7E520D7BC73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D9367DC-DEA6-48B2-949F-A7E520D7BC73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA264B72-E483-44DB-83DB-30E49C7D646D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA264B72-E483-44DB-83DB-30E49C7D646D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA264B72-E483-44DB-83DB-30E49C7D646D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA264B72-E483-44DB-83DB-30E49C7D646D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +102,8 @@ Global
 		{043FECEB-CA0B-4EE4-B1EB-119F2CB1D028} = {9479024B-4DB4-4A31-7A43-5A015B7B3EFE}
 		{A1C9F01A-540E-4407-9F24-41280D00DC31} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 		{20DD354E-67FD-46C8-B0BD-34B27130949E} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
+		{1D9367DC-DEA6-48B2-949F-A7E520D7BC73} = {F95F473B-E98A-ACD6-1986-755F447BE36F}
+		{EA264B72-E483-44DB-83DB-30E49C7D646D} = {3A8DF596-E814-FECC-DD4B-D8EF8AAC1A0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {77925787-747F-4405-88C9-232E967B9207}
