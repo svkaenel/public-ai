@@ -1,31 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
-using Evanto.Mcp.Tools.SupportDocs.Config;
 using Evanto.Mcp.Tools.SupportDocs.Contracts;
 using Evanto.Mcp.Tools.SupportDocs.ViewModels;
+using Evanto.Mcp.Common.Settings;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Repository;
 
-/// <summary>
-/// Repository für Produktdokumentation mit Vektordatenbank-Abfrage.
-/// Created: 30.05.2025
-/// </summary>
 public class EvSupportDocsRepository(
-    IOptions<EvSupportDocSettings>         config,
-    IEvEmbeddingService                                   embeddingService,
-    ILogger<EvSupportDocsRepository>             logger) : IEvSupportDocsRepository, IDisposable
+    EvQdrantSettings                    settings,
+    IEvEmbeddingService                 embeddingService,
+    ILogger<EvSupportDocsRepository>    logger) : IEvSupportDocsRepository, IDisposable
 {
-    private readonly EvSupportDocSettings          mConfig             = config.Value;
-    private readonly IEvEmbeddingService                          mEmbeddingService   = embeddingService;
-    private readonly ILogger<EvSupportDocsRepository>    mLogger             = logger;
-    private readonly QdrantClient                               mQdrantClient       = new(config.Value.QdrantEndpoint, 6334);
+    private readonly EvQdrantSettings                   mSettings           = settings;
+    private readonly IEvEmbeddingService                mEmbeddingService   = embeddingService;
+    private readonly ILogger<EvSupportDocsRepository>   mLogger             = logger;
+    private readonly QdrantClient                       mQdrantClient       = new(settings.QdrantEndpoint, settings.QdrantPort);
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Sucht in der Produktdokumentation nach passenden Text-Chunks. </summary>
@@ -37,7 +27,7 @@ public class EvSupportDocsRepository(
     ///
     /// <returns>   Gefundene Dokumentations-Chunks mit Dateiname und Score. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public async Task<IEnumerable<EvSupportDocViewModel>> GetProductDocumentationAsync(String query, Int32 limit = 10)
+    public async Task<IEnumerable<EvSupportDocViewModel>> GetSupportDocsAsync(String query, Int32 limit = 10)
     {
         if (String.IsNullOrWhiteSpace(query))
         {
@@ -46,7 +36,7 @@ public class EvSupportDocsRepository(
 
         if (limit <= 0)
         {
-            limit = mConfig.SearchLimit;
+            limit = mSettings.SearchLimit;
         }
 
         try
@@ -56,13 +46,13 @@ public class EvSupportDocsRepository(
 
             // search in vector database
             mLogger.LogDebug("Searching in collection {Collection} with limit {Limit}", 
-                mConfig.VectorCollectionName, limit);
+                mSettings.VectorCollectionName, limit);
             
             var searchResult = await mQdrantClient.SearchAsync(
-                mConfig.VectorCollectionName,
+                mSettings.VectorCollectionName,
                 queryEmbedding.ToArray(),
-                limit: (UInt64)limit,
-                scoreThreshold: mConfig.MinimumScore
+                limit: (UInt64) limit,
+                scoreThreshold: mSettings.MinimumScore
             );
 
             if (searchResult == null || !searchResult.Any())
@@ -97,7 +87,7 @@ public class EvSupportDocsRepository(
     ///-------------------------------------------------------------------------------------------------
     public async Task<IEnumerable<String>> GetFileNames(String query, Int32 limit = 10)
     {
-        var docs = await GetProductDocumentationAsync(query, limit);
+        var docs = await GetSupportDocsAsync(query, limit);
         if (docs == null || !docs.Any())
         {
             return Enumerable.Empty<String>();
@@ -121,32 +111,44 @@ public class EvSupportDocsRepository(
 
         return new EvSupportDocViewModel
         {
-            FileName = payload["fileName"].StringValue,
-            Content = payload["content"].StringValue,
-            Score = result.Score,
-            ChunkIndex = (Int32)payload["chunkIndex"].IntegerValue,
-            TotalChunks = (Int32)payload["totalChunks"].IntegerValue,
-            ChunkId = payload.ContainsKey("chunkId") ? payload["chunkId"].StringValue : String.Empty,
+            FileName     = payload["fileName"].StringValue,
+            Content      = payload["content"].StringValue,
+            Score        = result.Score,
+            ChunkIndex   = (Int32)payload["chunkIndex"].IntegerValue,
+            TotalChunks  = (Int32)payload["totalChunks"].IntegerValue,
+            ChunkId      = payload.ContainsKey("chunkId") ? payload["chunkId"].StringValue : String.Empty,
             BaseFileName = payload.ContainsKey("baseFileName") ? payload["baseFileName"].StringValue : String.Empty
         };
     }
 
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Dispose method to release resources. </summary>
+    /// <remarks>   SvK, 30.05.2025. </remarks>
+    /// <param name="disposing">   True to release both managed and unmanaged resources; 
+    /// false to release only unmanaged resources. </param>
+    ///-------------------------------------------------------------------------------------------------
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>
+    ///     Dispose method to release resources.
+    ///     This method is called by the Dispose method and can be overridden in derived classes.
+    ///     If disposing is true, managed resources are disposed; if false, only unmanaged resources
+    /// </summary>
+    /// 
+    /// <remarks>   SvK, 30.05.2025. </remarks>
+    /// 
+    /// <param name="disposing"></param>
+    ///-------------------------------------------------------------------------------------------------
     protected virtual void Dispose(Boolean disposing)
     {
         if (disposing)
         {   // dispose managed resources
             mQdrantClient?.Dispose();
         }
-    }
-
-    Task<IEnumerable<EvSupportDocViewModel>> IEvSupportDocsRepository.GetProductDocumentationAsync(string query, int limit)
-    {
-        throw new NotImplementedException();
     }
 }

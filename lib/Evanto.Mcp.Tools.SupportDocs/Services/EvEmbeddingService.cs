@@ -1,24 +1,16 @@
-using System;
-using System.Threading.Tasks;
-using Evanto.Mcp.Tools.SupportDocs.Config;
+using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportDocs.Contracts;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OllamaSharp;
 using OllamaSharp.Models;
-using OllamaSharp.Models.Chat;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Services;
 
-/// <summary>
-/// Service für die Generierung von Text-Embeddings.
-/// Created: 30.05.2025
-/// </summary>
-public class EvEmbeddingService(IOptions<EvSupportDocSettings> config, ILogger<EvEmbeddingService> logger) : IEvEmbeddingService
+public class EvEmbeddingService(EvEmbeddingSettings settings, ILogger<EvEmbeddingService> logger) : IEvEmbeddingService
 {
-    private readonly EvSupportDocSettings     mConfig                 = config.Value;
-    private readonly ILogger<EvEmbeddingService>             mLogger                 = logger;
-    private readonly OllamaApiClient                       mOllamaClient           = new(new Uri(config.Value.OllamaEndpoint)) { SelectedModel = config.Value.OllamaModel };
+    private readonly EvEmbeddingSettings            mSettings               = settings;
+    private readonly ILogger<EvEmbeddingService>    mLogger                 = logger;
+    private readonly OllamaApiClient                mChatClient             = new(new Uri(settings.Endpoint)) { SelectedModel = settings.DefaultModel };
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Generiert ein Embedding für den gegebenen Text. </summary>
@@ -40,11 +32,11 @@ public class EvEmbeddingService(IOptions<EvSupportDocSettings> config, ILogger<E
         {   // use the correct OllamaSharp method for generating embeddings
             var request = new EmbedRequest
             {
-                Model = mConfig.OllamaModel,
+                Model = mSettings.DefaultModel,
                 Input = new List<String> { text }
             };
 
-            var response = await mOllamaClient.EmbedAsync(request);
+            var response = await mChatClient.EmbedAsync(request);
             
             if (response?.Embeddings?.Any() == true)
             {   // get the first embedding (since we only sent one input) and convert doubles to floats

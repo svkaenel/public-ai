@@ -16,7 +16,7 @@ public class EvMcpServerSettings
     public IList<String>                Arguments       { get; set; } = new List<String>();
     public Boolean                      Enabled         { get; set; } = true;
     public Int32                        TimeoutSeconds  { get; set; } = 30;
-    public EvMcpTransportType             TransportType   { get; set; } = EvMcpTransportType.STDIO;
+    public EvMcpTransportType           TransportType   { get; set; } = EvMcpTransportType.STDIO;
     public String                       Url             { get; set; } = String.Empty;
-    public IList<EvMcpToolTestSettings>   ToolTests       { get; set; } = new List<EvMcpToolTestSettings>();
+    public IList<EvMcpToolTestSettings> ToolTests       { get; set; } = new List<EvMcpToolTestSettings>();
 }

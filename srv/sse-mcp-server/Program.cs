@@ -1,6 +1,7 @@
 ﻿
 using Evanto.Mcp.Apps;
 using Evanto.Mcp.Common.Settings;
+using Evanto.Mcp.Tools.SupportDocs.Extensions;
 using Evanto.Mcp.Tools.SupportWizard.Extensions;
 
 public class Program
@@ -34,12 +35,14 @@ public class Program
             .AddSupportWizardDB();
 
         builder.Services
-            .AddSupportWizardServices();
+            .AddSupportWizardServices()
+            .AddSupportDocs(settings);
 
         builder.Services
             .AddMcpServer()
             .WithHttpTransport()
-            .WithSupportWizardMcpTools();
+            .WithSupportWizardMcpTools()
+            .WithSupportDocMcpTools();
 
         var app = builder.Build();
 
@@ -54,7 +57,12 @@ public class Program
         
         if (!await app.TestSupportWizardAccessAsync())
         {   // Test DB access failed
-            logger.LogError("Failed to access the database. Please check your configuration.");
+            logger.LogError("Failed to access the support wizard database. Please check your configuration.");
+        }
+
+        if (!await app.TestSupportDocsAccessAsync("test"))
+        {   // Test DB access failed
+            logger.LogError("Failed to access the support documentation database. Please check your configuration.");
         }
 
         app.MapMcp();

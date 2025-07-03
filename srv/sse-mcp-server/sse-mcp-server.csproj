@@ -24,6 +24,7 @@
 
 <ItemGroup>
   <ProjectReference Include="../../lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj" />
+  <ProjectReference Include="../../lib/Evanto.Mcp.Tools.SupportDocs/Evanto.Mcp.Tools.SupportDocs.csproj" />
   <ProjectReference Include="../../lib/Evanto.Mcp.Tools.SupportWizard/Evanto.Mcp.Tools.SupportWizard.csproj" />
 </ItemGroup>
 
