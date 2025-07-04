@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Evanto.Mcp.Host.Factories;
 using Evanto.Mcp.Host.Tests;

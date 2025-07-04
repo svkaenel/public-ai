@@ -33,7 +33,6 @@
     <PackageVersion Include="BoxOfYellow.ConsoleMarkdownRenderer" Version="0.7.1" />
     <PackageVersion Include="Markdig" Version="0.41.1" />
     <PackageVersion Include="Spectre.Console" Version="0.50.0" />
-    <PackageVersion Include="FluentAssertions" Version="7.0.0" />
     <PackageVersion Include="xunit" Version="2.4.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
