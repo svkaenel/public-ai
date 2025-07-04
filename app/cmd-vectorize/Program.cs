@@ -4,6 +4,7 @@ using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Vectorize.Contracts;
 using Evanto.Mcp.Vectorize.Extensions;
 using Evanto.Mcp.Vectorize.Settings;
+using Evanto.Mcp.QdrantDB.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -84,6 +85,9 @@ public class Program
             {   // register configuration and services
                 services.Configure<EvVectorizeAppSettings>(context.Configuration);
                 services.AddPdfVectorizationServices();
+
+                // Register Qdrant document repository
+                services.AddQdrantDocumentRepository(settings.Qdrant);
 
                 services.AddSingleton(settings.Embeddings);
                 services.AddSingleton(settings.Qdrant);

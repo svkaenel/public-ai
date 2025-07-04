@@ -3,6 +3,7 @@ using Evanto.Mcp.Vectorize.Services;
 using Evanto.Mcp.Vectorize.Contracts;
 using Evanto.Mcp.Embeddings.Services;
 using Evanto.Mcp.Embeddings.Contracts;
+using Evanto.Mcp.Qdrant.Extensions;
 
 namespace Evanto.Mcp.Vectorize.Extensions;
 
@@ -26,7 +27,6 @@ public static class EvVectorizeAppExtensions
     {   // register all vectorization services
         services.AddScoped<IEvPdfTextExtractor, EvPdfTextExtractor>();
         services.AddScoped<IEvEmbeddingService, EvEmbeddingService>();
-        services.AddScoped<IEvVectorStoreService, EvVectorStoreService>();
         services.AddScoped<IEvFileTrackingService, EvFileTrackingService>();
         services.AddScoped<IEvPdfProcessingService, EvPdfProcessingService>();
 

@@ -20,6 +20,7 @@
     <ProjectReference Include="../../lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj" />
     <ProjectReference Include="../../lib/Evanto.Mcp.Common/Evanto.Mcp.Common.csproj" />
     <ProjectReference Include="../../lib/Evanto.Mcp.Embeddings/Evanto.Mcp.Embeddings.csproj" />
+    <ProjectReference Include="../../lib/Evanto.Mcp.QdrantDB/Evanto.Mcp.QdrantDB.csproj" />
   </ItemGroup>
 
   <ItemGroup>

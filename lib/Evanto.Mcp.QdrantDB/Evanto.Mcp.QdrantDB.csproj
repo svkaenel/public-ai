@@ -7,18 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Qdrant.Client" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <PackageReference Include="ModelContextProtocol" />
-    <PackageReference Include="ModelContextProtocol.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Evanto.Mcp.Common/Evanto.Mcp.Common.csproj" />
     <ProjectReference Include="../Evanto.Mcp.Embeddings/Evanto.Mcp.Embeddings.csproj" />
-    <ProjectReference Include="../Evanto.Mcp.QdrantDB/Evanto.Mcp.QdrantDB.csproj" />
   </ItemGroup>
-
 
 </Project>

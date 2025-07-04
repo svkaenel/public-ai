@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Build entire solution
 dotnet build
 
-# Run the main application
+# Run the main application (MCP client)
 dotnet run --project app/cmd-mcp-host
 
 # Run with specific parameters
@@ -17,6 +17,17 @@ dotnet run --project app/cmd-mcp-host -- --help        # Show help
 dotnet run --project app/cmd-mcp-host -- --list        # List available providers
 dotnet run --project app/cmd-mcp-host -- --test        # Run MCP server tests
 dotnet run --project app/cmd-mcp-host -- --telemetry   # Enable OpenTelemetry monitoring
+
+# Run PDF vectorization utility
+dotnet run --project app/cmd-vectorize                 # Process PDFs to vector embeddings
+
+# Run MCP servers independently
+dotnet run --project srv/sse-mcp-server                # HTTP/SSE MCP server
+dotnet run --project srv/stdio-mcp-server              # STDIO MCP server
+
+# Docker deployment
+docker-compose up -d                                   # Run both servers in containers
+docker-compose logs -f                                 # View container logs
 ```
 
 ### Testing
@@ -35,14 +46,19 @@ This is an **MCP (Model Context Protocol) Host System** that integrates multiple
 ### Core Components
 
 **Multi-Layer Architecture:**
-1. **cmd-mcp-host** (app/) - Console application entry point with interactive chat interface
-2. **Evanto.Mcp.Host** (lib/) - Core MCP hosting logic, factories, and testing framework
-3. **Evanto.Mcp.Common** (lib/) - Shared configuration, settings, and common utilities
-4. **Evanto.Mcp.Apps** (lib/) - Application helper services and shared app functionality
-5. **MCP Tool Libraries** (lib/) - Specialized tool implementations:
+1. **Console Applications** (app/) - Standalone command-line tools:
+   - **cmd-mcp-host** - Interactive MCP client with AI chat integration
+   - **cmd-vectorize** - PDF processing and vectorization utility
+2. **Core Libraries** (lib/) - Business logic and infrastructure:
+   - **Evanto.Mcp.Host** - Core MCP hosting logic, factories, and testing framework
+   - **Evanto.Mcp.Common** - Shared configuration, settings, and common utilities
+   - **Evanto.Mcp.Apps** - Application helper services and shared app functionality
+   - **Evanto.Mcp.Embeddings** - Text embedding services and vector operations
+   - **Evanto.Mcp.Qdrant** - Unified Qdrant vector database repository and document management
+3. **MCP Tool Libraries** (lib/) - Specialized tool implementations:
    - **Evanto.Mcp.Tools.SupportWizard** - Support request tracking with SQLite database
    - **Evanto.Mcp.Tools.SupportDocs** - Support documentation management tools
-6. **MCP Server Implementations** (srv/) - Standalone MCP servers:
+4. **MCP Server Implementations** (srv/) - Standalone MCP servers:
    - **sse-mcp-server** - SSE transport-based MCP server
    - **stdio-mcp-server** - STDIO transport-based MCP server
 
@@ -107,9 +123,32 @@ Each MCP server requires:
 
 ### Database Configuration
 For SupportWizard and other database-enabled tools:
-- `ConnectionStrings.SupportWizard`: SQLite connection string
+- `ConnectionStrings.SupportWizardDB`: SQLite connection string
 - Automatic database creation and migration on first run
 - Configurable through appsettings.json or environment variables
+
+### SupportDocs Configuration
+For document management and embedding functionality:
+- `Embeddings`: Configuration for text embedding provider (Ollama, OpenAI, etc.)
+  - `ProviderName`: Embedding service provider
+  - `DefaultModel`: Model for text embeddings (e.g., "nomic-embed-text")
+  - `Endpoint`: Service endpoint URL
+  - `ChunkSize`: Text chunk size for processing
+  - `ChunkOverlap`: Overlap between text chunks
+- `Qdrant`: Vector database configuration
+  - `Endpoint`: Qdrant server endpoint
+  - `CollectionName`: Collection name for document vectors
+  - `Port`: Qdrant server port
+  - `SearchLimit`: Maximum search results
+  - `MinimumScore`: Minimum similarity score threshold
+  - `VectorDimension`: Embedding vector dimensions
+
+### cmd-vectorize Configuration
+For PDF processing and vectorization:
+- `PdfDirectory`: Directory path containing PDF files to process
+- `TrackingFilePath`: JSON file path for tracking processed files
+- `Embeddings`: Same embedding configuration as SupportDocs
+- `Qdrant`: Same vector database configuration for storing processed embeddings
 
 ## Development Notes
 
@@ -132,18 +171,32 @@ For SupportWizard and other database-enabled tools:
 - `ModelContextProtocol.AspNetCore`: MCP server-side tools and attributes
 - `OpenTelemetry.*`: Observability and telemetry collection
 - `Microsoft.EntityFrameworkCore.Sqlite`: SQLite database provider for local storage
+- `SQLitePCLRaw.provider.sqlite3`: System SQLite provider for Alpine Linux compatibility
 - `Spectre.Console`: Rich console output and formatting
 - `BoxOfYellow.ConsoleMarkdownRenderer`: Markdown rendering in console
+
+### Vector Database Dependencies
+- `Qdrant.Client`: Official Qdrant vector database client for .NET
+- `Evanto.Mcp.Qdrant`: Unified repository layer for Qdrant operations
+- `Evanto.Mcp.Embeddings`: Text embedding services and vector processing
+
+### SupportDocs Specific Dependencies
+- **Embedding Providers**: Ollama, OpenAI, or other text embedding services
+- **Vector Database**: Qdrant for storing and searching document embeddings via unified repository
+- **Text Processing**: Configurable chunking and overlap for document processing
 
 ## Project Structure
 ```
 public-ai/
 ├── app/
-│   └── cmd-mcp-host/                    # Main console application
+│   ├── cmd-mcp-host/                    # Interactive MCP client application
+│   └── cmd-vectorize/                   # PDF processing and vectorization utility
 ├── lib/
 │   ├── Evanto.Mcp.Common/               # Shared settings and utilities
 │   ├── Evanto.Mcp.Host/                 # Core MCP hosting logic
 │   ├── Evanto.Mcp.Apps/                 # Application helper services
+│   ├── Evanto.Mcp.Embeddings/           # Text embedding services and vector operations
+│   ├── Evanto.Mcp.Qdrant/               # Unified Qdrant vector database repository
 │   ├── Evanto.Mcp.Tools.SupportWizard/ # Support ticket tracking system
 │   └── Evanto.Mcp.Tools.SupportDocs/   # Documentation management tools
 ├── srv/
@@ -151,24 +204,92 @@ public-ai/
 │   └── stdio-mcp-server/                # STDIO-based MCP server
 ├── db/
 │   └── ev-supportwizard.db              # SQLite database files
-└── .doc/
+├── pdfs/                                # PDF documents for vectorization
+│   └── processed_files.json            # File tracking for vectorization
+└── docs/
     ├── CLAUDE.md                        # This documentation file
     ├── CodingRules.md                   # C# coding standards
+    ├── README-Docker.md                 # Docker deployment guide
     └── Directory.Packages.props         # Central package management
 ```
 
-## SupportWizard Tool Overview
+## MCP Tool Systems Overview
+
+### SupportWizard Tool System
 The SupportWizard system provides comprehensive support request tracking:
 
-### Features
+#### Features
 - **Create Support Requests**: Customer email, name, channel, subject, description, topic, priority
 - **Assign to Users**: Route tickets to appropriate support staff based on expertise
 - **Status Management**: Track progress from New → InProgress → Resolved → Closed
 - **Search & Filter**: Find tickets by customer, status, topic, priority, assignee
 - **User Management**: Manage support staff and their topic specializations
 
-### Database Schema
+#### Database Schema
 - **SupportRequests Table**: Main ticket tracking with Guid primary keys
 - **Users Table**: Support staff with topic assignments
 - **Automatic Timestamps**: CreatedAt, UpdatedAt, ResolvedAt tracking
 - **Foreign Key Relations**: Proper referential integrity between tables
+
+### SupportDocs Tool System
+The SupportDocs system provides intelligent document management and search:
+
+#### Features
+- **Document Embedding**: Convert documents to vector embeddings for semantic search
+- **Vector Storage**: Store embeddings in Qdrant vector database
+- **Semantic Search**: Find relevant documents based on semantic similarity
+- **Multi-Format Support**: Handle various document formats and content types
+- **Embedding Providers**: Support multiple embedding services (Ollama, OpenAI, etc.)
+
+#### Architecture
+- **Embedding Service**: Text-to-vector conversion using configurable models
+- **Vector Database**: Qdrant for high-performance vector similarity search
+- **Repository Pattern**: Abstracted data access for embeddings and documents
+- **Configurable Chunking**: Adjustable text chunk sizes and overlap settings
+
+### Evanto.Mcp.Qdrant Library
+A unified repository library for Qdrant vector database operations:
+
+#### Features
+- **Unified Document Model**: Single `EvDocument` model for all vector operations
+- **Repository Pattern**: `IEvDocumentRepository` interface with consistent API
+- **Multiple Search Methods**: Vector search, text-based search, and combined queries
+- **Dependency Injection**: Easy registration with `AddQdrantDocumentRepository()`
+- **Cross-Project Compatibility**: Replaces individual Qdrant implementations
+
+#### Key Components
+- **Models/EvDocument.cs**: Unified document model with metadata and vector storage
+- **Contracts/IEvDocumentRepository.cs**: Repository interface for document operations
+- **Repository/EvDocumentRepository.cs**: Core implementation with Qdrant integration
+- **Extensions/EvQdrantExtensions.cs**: Dependency injection and service registration
+
+#### Migration Benefits
+- **Code Consolidation**: Eliminated duplicate Qdrant access code from multiple projects
+- **Consistent API**: Single interface for all document and vector operations
+- **Reduced Dependencies**: Projects no longer need direct Qdrant.Client references
+- **Better Maintainability**: Centralized vector database logic in one library
+
+## Standalone Applications
+
+### cmd-vectorize Utility
+A command-line application for batch processing PDF documents into vector embeddings:
+
+#### Features
+- **PDF Text Extraction**: Extract text content from PDF files using iText7
+- **Text Chunking**: Split documents into configurable chunks with overlap
+- **Vector Embeddings**: Convert text chunks to embeddings using Ollama or other providers
+- **Vector Storage**: Store embeddings in Qdrant vector database
+- **File Tracking**: JSON-based tracking to avoid reprocessing files
+- **Batch Processing**: Process multiple PDFs in a single run
+
+#### Use Cases
+- **Initial Setup**: Populate vector database with existing documentation
+- **Bulk Processing**: Process large document collections offline
+- **Scheduled Updates**: Run periodically to process new documents
+- **Development**: Test embedding and vectorization workflows
+
+#### Dependencies
+- **iText7**: PDF text extraction and processing
+- **OllamaSharp**: Integration with Ollama embedding service
+- **Qdrant.Client**: Vector database connectivity
+- **Evanto.Mcp.Embeddings**: Shared embedding service abstractions

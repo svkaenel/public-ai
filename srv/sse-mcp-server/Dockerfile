@@ -19,6 +19,9 @@ COPY Directory.Packages.props .
 # Copy all project files for proper dependency resolution
 COPY lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj lib/Evanto.Mcp.Apps/
 COPY lib/Evanto.Mcp.Common/Evanto.Mcp.Common.csproj lib/Evanto.Mcp.Common/
+COPY lib/Evanto.Mcp.Embeddings/Evanto.Mcp.Embeddings.csproj lib/Evanto.Mcp.Embeddings/
+COPY lib/Evanto.Mcp.Qdrant/Evanto.Mcp.Qdrant.csproj lib/Evanto.Mcp.Qdrant/
+COPY lib/Evanto.Mcp.Tools.SupportDocs/Evanto.Mcp.Tools.SupportDocs.csproj lib/Evanto.Mcp.Tools.SupportDocs/
 COPY lib/Evanto.Mcp.Tools.SupportWizard/Evanto.Mcp.Tools.SupportWizard.csproj lib/Evanto.Mcp.Tools.SupportWizard/
 COPY srv/sse-mcp-server/sse-mcp-server.csproj srv/sse-mcp-server/
 

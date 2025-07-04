@@ -1,14 +1,17 @@
 using System;
 using System.ComponentModel;
-using Evanto.Mcp.Tools.SupportDocs.Contracts;
+using System.Linq;
+using System.Text.Json;
+using Evanto.Mcp.QdrantDB.Contracts;
+using Evanto.Mcp.Tools.SupportDocs.Extensions;
 using ModelContextProtocol.Server;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Tools;
 
 [McpServerToolType]
-public class EvSupportDocsTool(IEvSupportDocsRepository supportDocsRepository)
+public class EvSupportDocsTool(IEvDocumentRepository documentRepository)
 {
-    private readonly IEvSupportDocsRepository mSupportDocsRepository = supportDocsRepository;
+    private readonly IEvDocumentRepository mDocumentRepository = documentRepository;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>Gets the user with installations by name.</summary>
@@ -25,17 +28,18 @@ public class EvSupportDocsTool(IEvSupportDocsRepository supportDocsRepository)
         {   // validate input
             if (String.IsNullOrWhiteSpace(query))
             {
-                return new { status = "error", message = "Query not be empty.." }.ToJson();
+                return JsonSerializer.Serialize(new { status = "error", message = "Query not be empty.." });
             }
 
-            var results = await mSupportDocsRepository.GetFileNames(query);
+            var searchResult = await mDocumentRepository.SearchByTextAsync(query, limit: 10);
+            var results = searchResult.Documents.Select(d => d.FileName).Distinct(StringComparer.OrdinalIgnoreCase);
 
             if (results.Count() == 0)
             {
-                return new { status = "not_found", message = $"No result documentation found for query {query}" }.ToJson();
+                return JsonSerializer.Serialize(new { status = "not_found", message = $"No result documentation found for query {query}" });
             }
 
-            return new { status = "success", data = results }.ToJson();
+            return JsonSerializer.Serialize(new { status = "success", data = results });
         }
 
         catch (Exception ex)
@@ -43,7 +47,7 @@ public class EvSupportDocsTool(IEvSupportDocsRepository supportDocsRepository)
             Console.Error.WriteLine($"Error in GetDocumentNames() for '{query}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
+            return JsonSerializer.Serialize(new { status = "error", message = ex.Message, details = ex.GetType().Name });
         }
     }
 
@@ -61,17 +65,18 @@ public class EvSupportDocsTool(IEvSupportDocsRepository supportDocsRepository)
         {   // validate input
             if (String.IsNullOrWhiteSpace(query))
             {
-                return new { status = "error", message = "Query not be empty.." }.ToJson();
+                return JsonSerializer.Serialize(new { status = "error", message = "Query not be empty.." });
             }
 
-            var results = await mSupportDocsRepository.GetSupportDocsAsync(query);
+            var searchResult = await mDocumentRepository.SearchByTextAsync(query, limit: 10);
+            var results = searchResult.Documents.ToSupportDocViewModels();
 
             if (results.Count() == 0)
             {
-                return new { status = "not_found", message = $"No result documentation found for query {query}" }.ToJson();
+                return JsonSerializer.Serialize(new { status = "not_found", message = $"No result documentation found for query {query}" });
             }
 
-            return new { status = "success", data = results }.ToJson();
+            return JsonSerializer.Serialize(new { status = "success", data = results });
         }
 
         catch (Exception ex)
@@ -79,7 +84,7 @@ public class EvSupportDocsTool(IEvSupportDocsRepository supportDocsRepository)
             Console.Error.WriteLine($"Error in GetInfosFromDocumentation() for '{query}': {ex.Message}");
             Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
 
-            return new { status = "error", message = ex.Message, details = ex.GetType().Name }.ToJson();
+            return JsonSerializer.Serialize(new { status = "error", message = ex.Message, details = ex.GetType().Name });
         }
     }
 

@@ -1,14 +1,12 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using Evanto.Mcp.Tools.SupportDocs.Contracts;
-using Evanto.Mcp.Tools.SupportDocs.Repository;
 using Microsoft.Extensions.Hosting;
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportDocs.Tools;
 using Evanto.Mcp.Embeddings.Contracts;
 using Evanto.Mcp.Embeddings.Services;
+using Evanto.Mcp.QdrantDB.Contracts;
+using Evanto.Mcp.QdrantDB.Repository;
+using Evanto.Mcp.QdrantDB.Extensions;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Extensions;
 
@@ -31,11 +29,9 @@ public static class EvSupportDocExtensions
         ArgumentNullException.ThrowIfNull(settings.EmbeddingSettings, "Embedding settings must be valid!");
 
         // register services
-        services.AddScoped<IEvEmbeddingService, EvEmbeddingService>();
-        services.AddScoped<IEvSupportDocsRepository, EvSupportDocsRepository>();
+        services.AddQdrantDocumentRepository(settings.QdrantSettings);
 
         services.AddSingleton(settings.EmbeddingSettings);
-        services.AddSingleton(settings.QdrantSettings);
 
         return services;
     }
@@ -72,16 +68,15 @@ public static class EvSupportDocExtensions
 
         try
         {   // get the repository
-            var repository = app.Services.CreateScope().ServiceProvider.GetService<IEvSupportDocsRepository>();
+            var repository = app.Services.CreateScope().ServiceProvider.GetService<IEvDocumentRepository>();
             if (repository == null)
             {
                 return false;
             }
 
             // test the support documentation access
-            var documentation = await repository.GetSupportDocsAsync(query);
-            // var viewModel    = documentation != null ? new ProductRegistrationViewModel().InitFrom(documentation) : null;
-            var ok = documentation != null && documentation.Any();
+            var searchResult = await repository.SearchByTextAsync(query, limit: 5);
+            var ok = searchResult != null && searchResult.Success && searchResult.Documents.Any();
 
             return ok;
         }
