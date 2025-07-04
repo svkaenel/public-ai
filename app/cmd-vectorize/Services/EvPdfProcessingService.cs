@@ -6,6 +6,7 @@ using Evanto.Mcp.Vectorize.Models;
 using Evanto.Mcp.QdrantDB.Contracts;
 using Evanto.Mcp.QdrantDB.Models;
 using Microsoft.Extensions.Options;
+using Evanto.Mcp.Pdfs.Contracts;
 
 namespace Evanto.Mcp.Vectorize.Services;
 
@@ -15,19 +16,19 @@ namespace Evanto.Mcp.Vectorize.Services;
 /// <remarks>   SvK, 03.07.2025. </remarks>
 ///-------------------------------------------------------------------------------------------------
 public class EvPdfProcessingService(
-    IEvPdfTextExtractor textExtractor,
-    IEvEmbeddingService embeddingService,
-    IEvDocumentRepository documentRepository,
-    IEvFileTrackingService fileTrackingService,
-    IOptions<EvVectorizeAppSettings> settings,
-    ILogger<EvPdfProcessingService> logger) : IEvPdfProcessingService
+    IEvPdfTextExtractorService          textExtractor,
+    IEvEmbeddingService                 embeddingService,
+    IEvDocumentRepository               documentRepository,
+    IEvFileTrackingService              fileTrackingService,
+    IOptions<EvVectorizeAppSettings>    settings,
+    ILogger<EvPdfProcessingService>     logger) : IEvPdfProcessingService
 {
-    private readonly IEvPdfTextExtractor mTextExtractor = textExtractor;
-    private readonly IEvEmbeddingService mEmbeddingService = embeddingService;
-    private readonly IEvDocumentRepository mDocumentRepository = documentRepository;
-    private readonly IEvFileTrackingService mFileTrackingService = fileTrackingService;
-    private readonly EvVectorizeAppSettings mSettings = settings.Value;
-    private readonly ILogger<EvPdfProcessingService> mLogger = logger;
+    private readonly IEvPdfTextExtractorService         mTextExtractor          = textExtractor;
+    private readonly IEvEmbeddingService                mEmbeddingService       = embeddingService;
+    private readonly IEvDocumentRepository              mDocumentRepository     = documentRepository;
+    private readonly IEvFileTrackingService             mFileTrackingService    = fileTrackingService;
+    private readonly EvVectorizeAppSettings             mSettings               = settings.Value;
+    private readonly ILogger<EvPdfProcessingService>    mLogger                 = logger;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Processes all new PDF files found in the configured directory. </summary>
@@ -49,6 +50,7 @@ public class EvPdfProcessingService(
             {   // create directory if missing
                 mLogger.LogWarning("PDF directory does not exist: {Directory}", mSettings.FullPdfDirectory);
                 Directory.CreateDirectory(mSettings.FullPdfDirectory);
+
                 return result; // return empty result if directory had to be created
             }
 
@@ -58,6 +60,7 @@ public class EvPdfProcessingService(
             if (!pdfFiles.Any())
             {   // no files found
                 mLogger.LogInformation("No PDF files found in directory: {Directory}", mSettings.FullPdfDirectory);
+
                 return result; // return empty result if no files found
             }
 
@@ -68,16 +71,15 @@ public class EvPdfProcessingService(
             {
                 try
                 {   // process individual file
-                    var fileResult = await ProcessSpecificPdfAsync(filePath);
-                    result.ProcessedCount += fileResult.ProcessedCount;
-                    result.SkippedCount += fileResult.SkippedCount;
-                    result.ErrorCount += fileResult.ErrorCount;
+                    var fileResult             = await ProcessSpecificPdfAsync(filePath);
+                        result.ProcessedCount += fileResult.ProcessedCount;
+                        result.SkippedCount   += fileResult.SkippedCount;
+                        result.ErrorCount     += fileResult.ErrorCount;
 
                     foreach (var error in fileResult.Errors)
                     {   // add errors to result
                         result.Errors[error.Key] = error.Value;
                     }
-
                 }
 
                 catch (Exception ex)
@@ -124,6 +126,7 @@ public class EvPdfProcessingService(
             {   // already processed
                 mLogger.LogInformation("PDF already processed: {FileName}", fileName);
                 result.SkippedCount = 1;
+
                 return result;
             }
 
@@ -135,6 +138,7 @@ public class EvPdfProcessingService(
                 mLogger.LogWarning("No text extracted from PDF: {FileName}", fileName);
                 result.ErrorCount = 1;
                 result.Errors[fileName] = "No text content found";
+
                 return result;
             }
 
@@ -146,35 +150,36 @@ public class EvPdfProcessingService(
                 mLogger.LogWarning("No text chunks created for PDF: {FileName}", fileName);
                 result.ErrorCount = 1;
                 result.Errors[fileName] = "No text chunks created";
+
                 return result;
             }
 
             mLogger.LogInformation("Created {ChunkCount} chunks for PDF: {FileName}", chunks.Count, fileName);
 
             // generate embeddings
-            var embeddings = await mEmbeddingService.GenerateEmbeddingsAsync(chunks);
+            var embeddings   = await mEmbeddingService.GenerateEmbeddingsAsync(chunks);
 
             // create document records using unified model
-            var documents = new List<EvDocument>();
+            var documents    = new List<EvDocument>();
             var baseFileName = Path.GetFileNameWithoutExtension(fileName);
 
             for (var i = 0; i < chunks.Count; i++)
             {   // create document record for each chunk
-                var documentId = Guid.NewGuid().ToString(); // use pure GUID for Qdrant compatibility
-                var chunkId = $"{baseFileName}_{i}";
+                var documentId = Guid.NewGuid().ToString();  // use pure GUID for Qdrant compatibility
+                var chunkId    = $"{baseFileName}_{i}";
 
                 documents.Add(new EvDocument
                 {
-                    Id = documentId,
-                    FileName = fileName,
-                    Content = chunks[i],
-                    Vector = embeddings[i],
-                    ProcessedAt = DateTime.UtcNow,
-                    FileHash = fileHash,
-                    ChunkIndex = i,
-                    TotalChunks = chunks.Count,
+                    Id           = documentId,
+                    FileName     = fileName,
+                    Content      = chunks[i],
+                    Vector       = embeddings[i],
+                    ProcessedAt  = DateTime.UtcNow,
+                    FileHash     = fileHash,
+                    ChunkIndex   = i,
+                    TotalChunks  = chunks.Count,
                     BaseFileName = baseFileName,
-                    ChunkId = chunkId
+                    ChunkId      = chunkId
                 });
             }
 
@@ -185,6 +190,7 @@ public class EvPdfProcessingService(
             await mFileTrackingService.AddProcessedFileAsync(filePath, fileHash);
 
             mLogger.LogInformation("Successfully processed PDF: {FileName} ({ChunkCount} chunks)", fileName, chunks.Count);
+
             result.ProcessedCount = 1;
 
             return result;
@@ -194,7 +200,7 @@ public class EvPdfProcessingService(
         {   // handle processing error
             mLogger.LogError(ex, "Failed to process PDF: {FileName}", fileName);
 
-            result.ErrorCount = 1;
+            result.ErrorCount       = 1;
             result.Errors[fileName] = ex.Message;
 
             return result;

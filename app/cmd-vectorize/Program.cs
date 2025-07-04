@@ -8,6 +8,8 @@ using Evanto.Mcp.QdrantDB.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Evanto.Mcp.Embeddings.Extensions;
+using Evanto.Mcp.Pdfs.Extensions;
 
 namespace Evanto.Mcp.Vectorize;
 
@@ -86,8 +88,14 @@ public class Program
                 services.Configure<EvVectorizeAppSettings>(context.Configuration);
                 services.AddPdfVectorizationServices();
 
+                // Register embedding service
+                services.AddEmbeddings(settings.Embeddings);
+
                 // Register Qdrant document repository
                 services.AddQdrantDocumentRepository(settings.Qdrant);
+
+                // Register iText PDF text extractor service
+                services.AddPdfTextExtractor();
 
                 services.AddSingleton(settings.Embeddings);
                 services.AddSingleton(settings.Qdrant);

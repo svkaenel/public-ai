@@ -1,7 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Evanto.Mcp.Apps;
+﻿using Evanto.Mcp.Apps;
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportWizard.Extensions;
+using Evanto.Mcp.Tools.SupportDocs.Extensions;
 
 public class Program
 {
@@ -20,13 +20,14 @@ public class Program
         var builder = Host.CreateApplicationBuilder(args);
 
         builder
-            .AddSupportWizardDB();
-            
+            .AddSupportWizard();
+
         builder.Services
-            .AddSupportWizardServices()
+            .AddSupportDocs(settings)
             .AddMcpServer()
             .WithStdioServerTransport()
-            .WithSupportWizardMcpTools();
+            .WithSupportWizardMcpTools()
+            .WithSupportDocMcpTools();
 
         var app = builder.Build();
       

@@ -18,7 +18,7 @@ public class EvFileTrackingService(
 {
     private readonly EvVectorizeAppSettings               mConfig             = config.Value;
     private readonly ILogger<EvFileTrackingService>       mLogger             = logger;
-    private readonly Dictionary<String, String>          mProcessedFiles      = []; // use collection expression
+    private readonly Dictionary<String, String>           mProcessedFiles     = []; // use collection expression
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Gets a set of all processed file names. </summary>

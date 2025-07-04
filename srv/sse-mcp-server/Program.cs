@@ -32,13 +32,10 @@ public class Program
         }
 
         builder
-            .AddSupportWizardDB();
+            .AddSupportWizard();
 
         builder.Services
-            .AddSupportWizardServices()
-            .AddSupportDocs(settings);
-
-        builder.Services
+            .AddSupportDocs(settings)
             .AddMcpServer()
             .WithHttpTransport()
             .WithSupportWizardMcpTools()

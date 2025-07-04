@@ -17,20 +17,24 @@ namespace Evanto.Mcp.Tools.SupportWizard.Extensions;
 public static class EvSupportWizardExtensions
 {
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Add support wizard MCP tools. </summary>
-    ///
+    /// <summary>   Adds support wizard services to the specified host application builder. </summary>
+    ///  
     /// <remarks>   SvK, 01.07.2025. </remarks>
-    ///
-    /// <param name="services"> The services to act on. </param>
-    ///
-    /// <returns>   An IServiceCollection. </returns>
+    /// 
+    /// <param name="builder"> The host application builder to extend. </param>
+    /// 
+    /// <returns>   An IHostApplicationBuilder with the added support wizard services. </returns>
     ///-------------------------------------------------------------------------------------------------
+    public static IHostApplicationBuilder AddSupportWizard(this IHostApplicationBuilder builder)
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull("Host application builder must be valid!");
 
-    public static IServiceCollection AddSupportWizardServices(this IServiceCollection services)
-    {   // settings are need for the client
-        services.AddScoped<ISupportWizardRepository, SupportWizardRepository>();
-        // return the service collection
-        return services;
+        builder.AddSupportWizardDB();
+
+        builder.Services
+            .AddSupportWizardServices();
+
+        return builder;
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -46,40 +50,6 @@ public static class EvSupportWizardExtensions
     {   // settings are need for the client
         builder.WithTools<EvSupportWizardTool>();
         // return the service collection
-        return builder;
-    }
-
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Adds the support wizard database. </summary>
-    ///
-    /// <remarks>   SvK, 03.06.2025. </remarks>
-    ///
-    /// <param name="builder">      The builder to extend. </param>
-    ///
-    /// <exception cref="ArgumentNullException">    Thrown when one or more required arguments are null. </exception>
-    ///-------------------------------------------------------------------------------------------------
-    public static IHostApplicationBuilder AddSupportWizardDB(this IHostApplicationBuilder builder)
-    {   // check requirements
-        ArgumentNullException.ThrowIfNull("Host application builder must be valid!");
-
-        var connectDB = builder.Configuration.GetConnectionString("SupportWizardDB");
-
-        ArgumentException.ThrowIfNullOrEmpty("Support wizard connection string must be valid!");
-
-        // Initialize SQLite with system provider for Alpine Linux containers
-        SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());
-
-        // add mybrunner + zbv database with minimal logging
-        builder.Services.AddDbContext<SupportWizardDbContext>(options =>
-        {
-            options.UseSqlite(connectDB);
-            // Disable sensitive data logging and detailed errors for production
-            options.EnableSensitiveDataLogging(false);
-            options.EnableDetailedErrors(false);
-            // Suppress EF Core logging completely to avoid stdout interference
-            options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddFilter(_ => false)));
-        });
-
         return builder;
     }
 
@@ -148,6 +118,57 @@ public static class EvSupportWizardExtensions
             Console.WriteLine("Migrating database failed: {0}!", ex.Message);
             return false;
         }
+    }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Add support wizard MCP tools. </summary>
+    ///
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    ///
+    /// <param name="services"> The services to act on. </param>
+    ///
+    /// <returns>   An IServiceCollection. </returns>
+    ///-------------------------------------------------------------------------------------------------
+
+    private static IServiceCollection AddSupportWizardServices(this IServiceCollection services)
+    {   // settings are need for the client
+        services.AddScoped<ISupportWizardRepository, SupportWizardRepository>();
+        // return the service collection
+        return services;
+    }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Adds the support wizard database. </summary>
+    ///
+    /// <remarks>   SvK, 03.06.2025. </remarks>
+    ///
+    /// <param name="builder">      The builder to extend. </param>
+    ///
+    /// <exception cref="ArgumentNullException">    Thrown when one or more required arguments are null. </exception>
+    ///-------------------------------------------------------------------------------------------------
+    private static IHostApplicationBuilder AddSupportWizardDB(this IHostApplicationBuilder builder)
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull("Host application builder must be valid!");
+
+        var connectDB = builder.Configuration.GetConnectionString("SupportWizardDB");
+
+        ArgumentException.ThrowIfNullOrEmpty("Support wizard connection string must be valid!");
+
+        // Initialize SQLite with system provider for Alpine Linux containers
+        SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());
+
+        // add mybrunner + zbv database with minimal logging
+        builder.Services.AddDbContext<SupportWizardDbContext>(options =>
+        {
+            options.UseSqlite(connectDB);
+            // Disable sensitive data logging and detailed errors for production
+            options.EnableSensitiveDataLogging(false);
+            options.EnableDetailedErrors(false);
+            // Suppress EF Core logging completely to avoid stdout interference
+            options.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddFilter(_ => false)));
+        });
+
+        return builder;
     }
 
 }

@@ -1,19 +1,19 @@
-using Evanto.Mcp.Vectorize.Contracts;
+using Evanto.Mcp.Pdfs.Contracts;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using Microsoft.Extensions.Logging;
 using System.Text; // Required for StringBuilder
 
-namespace Evanto.Mcp.Vectorize.Services;
+namespace Evanto.Mcp.Pdfs.Services;
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>   PDF text extraction service implementation. </summary>
 ///
 /// <remarks>   SvK, 03.07.2025. </remarks>
 ///-------------------------------------------------------------------------------------------------
-public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfTextExtractor
+public class EvPdfTextExtractorService(ILogger<EvPdfTextExtractorService> logger) : IEvPdfTextExtractorService
 {
-    private readonly ILogger<EvPdfTextExtractor>    mLogger     = logger;
+    private readonly ILogger<EvPdfTextExtractorService>    mLogger     = logger;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Extract text asynchronously from PDF file. </summary>
@@ -118,7 +118,7 @@ public class EvPdfTextExtractor(ILogger<EvPdfTextExtractor> logger) : IEvPdfText
                 // start new chunk with overlap
                 if (overlap > 0)
                 {   // add overlap from previous chunk
-                    var overlapText = GetOverlapText(currentChunk.ToString(), overlap);
+                    var overlapText  = GetOverlapText(currentChunk.ToString(), overlap);
                     currentChunk     = new StringBuilder(overlapText);
                     currentChunkSize = overlapText.Length;
                 }
