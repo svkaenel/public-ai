@@ -1,3 +1,4 @@
+using System;
 using Evanto.Mcp.QdrantDB.Models;
 
 namespace Evanto.Mcp.QdrantDB.Contracts;

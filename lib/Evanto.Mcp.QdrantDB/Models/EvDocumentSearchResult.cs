@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 namespace Evanto.Mcp.QdrantDB.Models;
@@ -10,20 +11,20 @@ namespace Evanto.Mcp.QdrantDB.Models;
 public class EvDocumentSearchResult
 {
     /// <summary>   Documents found matching the search criteria. </summary>
-    public IEnumerable<EvDocument> Documents { get; set; } = Enumerable.Empty<EvDocument>();
+    public IEnumerable<EvDocument>      Documents           { get; set; } = Enumerable.Empty<EvDocument>();
 
     /// <summary>   Total number of documents found. </summary>
-    public Int32 TotalCount { get; set; }
+    public Int32                        TotalCount          { get; set; }
 
     /// <summary>   Original query that produced this result. </summary>
-    public String Query { get; set; } = String.Empty;
+    public String                       Query               { get; set; } = String.Empty;
 
     /// <summary>   Time taken to execute the search. </summary>
-    public TimeSpan SearchDuration { get; set; }
+    public TimeSpan                     SearchDuration      { get; set; }
 
     /// <summary>   Indicates if the search was successful. </summary>
-    public Boolean Success { get; set; } = true;
+    public Boolean                      Success             { get; set; } = true;
 
     /// <summary>   Error message if search failed. </summary>
-    public String? ErrorMessage { get; set; }
+    public String?                      ErrorMessage        { get; set; }
 }

@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Embeddings.Contracts;
 using Evanto.Mcp.QdrantDB.Contracts;
@@ -23,7 +25,7 @@ public static class EvQdrantExtensions
     ///-------------------------------------------------------------------------------------------------
     public static IServiceCollection AddQdrantDocumentRepository(
         this IServiceCollection services, 
-        EvQdrantSettings settings)
+        EvQdrantSettings        settings)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(settings);
@@ -43,8 +45,8 @@ public static class EvQdrantExtensions
     /// <returns>   The service collection for chaining. </returns>
     ///-------------------------------------------------------------------------------------------------
     public static IServiceCollection AddQdrantDocumentRepository(
-        this IServiceCollection services,
-        Action<EvQdrantSettings> configureSettings)
+        this IServiceCollection     services,
+        Action<EvQdrantSettings>    configureSettings)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configureSettings);
@@ -70,7 +72,7 @@ public static class EvQdrantExtensions
     ///-------------------------------------------------------------------------------------------------
     public static IServiceCollection AddQdrantDocumentRepositoryWithEmbeddings(
         this IServiceCollection services, 
-        EvQdrantSettings settings)
+        EvQdrantSettings        settings)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(settings);

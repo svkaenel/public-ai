@@ -213,7 +213,7 @@ public class SupportWizardRepository : ISupportWizardRepository
     ///
     /// <returns>   List of users responsible for the topic. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public async Task<IEnumerable<User>> GetUserByTopicAsync(Topic topic)
+    public async Task<IEnumerable<User>> GetUsersByTopicAsync(Topic topic)
     {
         try
         {

@@ -74,7 +74,7 @@ public interface ISupportWizardRepository
     ///
     /// <returns>   List of users responsible for the topic. </returns>
     ///-------------------------------------------------------------------------------------------------
-    Task<IEnumerable<User>> GetUserByTopicAsync(Topic topic);
+    Task<IEnumerable<User>> GetUsersByTopicAsync(Topic topic);
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Updates the status of a support request asynchronously. </summary>

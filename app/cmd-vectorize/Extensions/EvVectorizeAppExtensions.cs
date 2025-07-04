@@ -3,7 +3,7 @@ using Evanto.Mcp.Vectorize.Services;
 using Evanto.Mcp.Vectorize.Contracts;
 using Evanto.Mcp.Embeddings.Services;
 using Evanto.Mcp.Embeddings.Contracts;
-using Evanto.Mcp.Qdrant.Extensions;
+using Evanto.Mcp.QdrantDB.Extensions;
 
 namespace Evanto.Mcp.Vectorize.Extensions;
 
