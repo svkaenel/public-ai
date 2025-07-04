@@ -291,13 +291,12 @@ public class SupportWizardRepository : ISupportWizardRepository
     ///
     /// <returns>   List of all support requests. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public async Task<IEnumerable<SupportRequest>> GetAllSupportRequestsAsync(int skip = 0, int take = 100)
+    public async Task<IEnumerable<SupportRequest>> GetAllSupportRequestsAsync(Int32 skip = 0, Int32 take = 100)
     {
         try
         {
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
-                .OrderByDescending(sr => sr.ReceivedAt)
                 .Skip(skip)
                 .Take(take)
                 .ToListAsync();
