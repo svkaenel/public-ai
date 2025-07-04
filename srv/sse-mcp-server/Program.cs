@@ -1,4 +1,5 @@
 ﻿
+using System.Diagnostics;
 using Evanto.Mcp.Apps;
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportDocs.Extensions;
@@ -17,11 +18,13 @@ public class Program
         var settings                = appHelper.LoadConfiguration<EvMcpSrvAppSettings>();
         var (logger, loggerFactory) = appHelper.GetLogger(settings);
 
-        // Create a WebApplicationBuilder
         if (settings == null)
         {
             throw new ArgumentNullException(nameof(settings), "Application settings must be provided for web application.");
         }
+
+        logger.LogDebug($"Starting SSE MCP Server with settings: {settings.ToJson()}");
+        Console.WriteLine($"Starting SSE MCP Server with Qdrant settings: {settings.Qdrant.ToJson()}");
 
         var builder = WebApplication.CreateBuilder(args);
 

@@ -43,6 +43,21 @@ dotnet test --collect:"XPlat Code Coverage"
 
 This is an **MCP (Model Context Protocol) Host System** that integrates multiple MCP servers with AI chat providers. The architecture follows a Factory Pattern with Dependency Injection and Configuration-Driven design.
 
+### Library Organization Philosophy
+
+The library structure follows a **clean architecture approach** with clear separation of concerns:
+
+- **Core Libraries**: Pure business logic with minimal external dependencies
+- **External Tool Integration Libraries**: Thin abstraction layers over external tools (iText7, Qdrant)
+- **MCP Tool Libraries**: Domain-specific implementations using core and integration libraries
+- **Applications**: Composition root that combines libraries to create executable programs
+
+This approach provides:
+- **Testability**: Easy to mock external dependencies via abstraction layers
+- **Maintainability**: Clear boundaries between business logic and external tools
+- **Flexibility**: Easy to swap implementations (e.g., different PDF processors)
+- **Dependency Management**: External tools are isolated to specific libraries
+
 ### Core Components
 
 **Multi-Layer Architecture:**
@@ -54,11 +69,13 @@ This is an **MCP (Model Context Protocol) Host System** that integrates multiple
    - **Evanto.Mcp.Common** - Shared configuration, settings, and common utilities
    - **Evanto.Mcp.Apps** - Application helper services and shared app functionality
    - **Evanto.Mcp.Embeddings** - Text embedding services and vector operations
-   - **Evanto.Mcp.Qdrant** - Unified Qdrant vector database repository and document management
-3. **MCP Tool Libraries** (lib/) - Specialized tool implementations:
+3. **External Tool Integration Libraries** (lib/) - Wrappers for external dependencies:
+   - **Evanto.Mcp.Pdfs** - PDF text extraction services using iText7
+   - **Evanto.Mcp.QdrantDB** - Unified Qdrant vector database repository and document management
+4. **MCP Tool Libraries** (lib/) - Specialized tool implementations:
    - **Evanto.Mcp.Tools.SupportWizard** - Support request tracking with SQLite database
    - **Evanto.Mcp.Tools.SupportDocs** - Support documentation management tools
-4. **MCP Server Implementations** (srv/) - Standalone MCP servers:
+5. **MCP Server Implementations** (srv/) - Standalone MCP servers:
    - **sse-mcp-server** - SSE transport-based MCP server
    - **stdio-mcp-server** - STDIO transport-based MCP server
 
@@ -175,12 +192,19 @@ For PDF processing and vectorization:
 - `Spectre.Console`: Rich console output and formatting
 - `BoxOfYellow.ConsoleMarkdownRenderer`: Markdown rendering in console
 
-### Vector Database Dependencies
+### External Tool Dependencies
+#### PDF Processing Dependencies
+- `iText7.Core`: PDF text extraction and document processing
+- `Evanto.Mcp.Pdfs`: Abstraction layer for PDF text extraction services
+
+#### Vector Database Dependencies
 - `Qdrant.Client`: Official Qdrant vector database client for .NET
-- `Evanto.Mcp.Qdrant`: Unified repository layer for Qdrant operations
+- `Evanto.Mcp.QdrantDB`: Unified repository layer for Qdrant operations
 - `Evanto.Mcp.Embeddings`: Text embedding services and vector processing
 
 ### SupportDocs Specific Dependencies
+- **Evanto.Mcp.Embeddings**: Text embedding service abstractions
+- **Evanto.Mcp.QdrantDB**: Vector database repository for document storage and search
 - **Embedding Providers**: Ollama, OpenAI, or other text embedding services
 - **Vector Database**: Qdrant for storing and searching document embeddings via unified repository
 - **Text Processing**: Configurable chunking and overlap for document processing
@@ -196,7 +220,8 @@ public-ai/
 │   ├── Evanto.Mcp.Host/                 # Core MCP hosting logic
 │   ├── Evanto.Mcp.Apps/                 # Application helper services
 │   ├── Evanto.Mcp.Embeddings/           # Text embedding services and vector operations
-│   ├── Evanto.Mcp.Qdrant/               # Unified Qdrant vector database repository
+│   ├── Evanto.Mcp.Pdfs/                 # PDF text extraction services (iText7 wrapper)
+│   ├── Evanto.Mcp.QdrantDB/             # Unified Qdrant vector database repository
 │   ├── Evanto.Mcp.Tools.SupportWizard/ # Support ticket tracking system
 │   └── Evanto.Mcp.Tools.SupportDocs/   # Documentation management tools
 ├── srv/
@@ -242,32 +267,65 @@ The SupportDocs system provides intelligent document management and search:
 - **Embedding Providers**: Support multiple embedding services (Ollama, OpenAI, etc.)
 
 #### Architecture
-- **Embedding Service**: Text-to-vector conversion using configurable models
-- **Vector Database**: Qdrant for high-performance vector similarity search
+- **Embedding Service**: Text-to-vector conversion using configurable models (via Evanto.Mcp.Embeddings)
+- **Vector Database**: Qdrant for high-performance vector similarity search (via Evanto.Mcp.QdrantDB)
 - **Repository Pattern**: Abstracted data access for embeddings and documents
 - **Configurable Chunking**: Adjustable text chunk sizes and overlap settings
 
-### Evanto.Mcp.Qdrant Library
+#### External Dependencies
+- **Qdrant Database**: High-performance vector similarity search engine
+- **Ollama/OpenAI**: Text embedding model providers
+
+### Evanto.Mcp.Pdfs Library
+A PDF processing abstraction library that wraps iText7 for text extraction:
+
+#### Features
+- **PDF Text Extraction**: Extract raw text content from PDF documents
+- **Service Abstraction**: Clean interface that hides iText7 complexity
+- **Error Handling**: Robust error handling for corrupted or protected PDFs
+- **Dependency Injection**: Easy registration with `AddPdfTextExtractor()`
+- **Performance Optimized**: Efficient text extraction for large documents
+
+#### Key Components
+- **Contracts/IEvPdfExtractorService.cs**: Service interface for PDF text extraction
+- **Services/EvPdfTextExtractorService.cs**: iText7-based implementation
+- **Extensions/EvPdfExtractorExtensions.cs**: Dependency injection registration
+
+#### External Dependencies
+- **iText7.Core**: Commercial-grade PDF processing library
+- Provides enterprise-level PDF text extraction capabilities
+- Handles complex PDF structures, fonts, and encodings
+
+### Evanto.Mcp.QdrantDB Library
 A unified repository library for Qdrant vector database operations:
 
 #### Features
 - **Unified Document Model**: Single `EvDocument` model for all vector operations
 - **Repository Pattern**: `IEvDocumentRepository` interface with consistent API
 - **Multiple Search Methods**: Vector search, text-based search, and combined queries
+- **Advanced Filtering**: Support for date ranges, file names, and custom filters
 - **Dependency Injection**: Easy registration with `AddQdrantDocumentRepository()`
 - **Cross-Project Compatibility**: Replaces individual Qdrant implementations
 
 #### Key Components
 - **Models/EvDocument.cs**: Unified document model with metadata and vector storage
+- **Models/EvDocumentSearchQuery.cs**: Flexible search query model with filtering
+- **Models/EvDocumentSearchResult.cs**: Search result model with metadata
 - **Contracts/IEvDocumentRepository.cs**: Repository interface for document operations
 - **Repository/EvDocumentRepository.cs**: Core implementation with Qdrant integration
 - **Extensions/EvQdrantExtensions.cs**: Dependency injection and service registration
+
+#### External Dependencies
+- **Qdrant.Client**: Official .NET client for Qdrant vector database
+- Provides high-performance vector similarity search
+- Supports advanced filtering, payloads, and metadata storage
 
 #### Migration Benefits
 - **Code Consolidation**: Eliminated duplicate Qdrant access code from multiple projects
 - **Consistent API**: Single interface for all document and vector operations
 - **Reduced Dependencies**: Projects no longer need direct Qdrant.Client references
 - **Better Maintainability**: Centralized vector database logic in one library
+- **Enhanced Features**: Advanced search queries and filtering capabilities
 
 ## Standalone Applications
 
@@ -289,7 +347,12 @@ A command-line application for batch processing PDF documents into vector embedd
 - **Development**: Test embedding and vectorization workflows
 
 #### Dependencies
-- **iText7**: PDF text extraction and processing
+- **Evanto.Mcp.Pdfs**: PDF text extraction services (wraps iText7)
+- **Evanto.Mcp.Embeddings**: Text embedding service abstractions  
+- **Evanto.Mcp.QdrantDB**: Vector database repository and document management
 - **OllamaSharp**: Integration with Ollama embedding service
-- **Qdrant.Client**: Vector database connectivity
-- **Evanto.Mcp.Embeddings**: Shared embedding service abstractions
+
+#### External Tool Integration
+- **iText7 (via Evanto.Mcp.Pdfs)**: Enterprise PDF text extraction
+- **Qdrant (via Evanto.Mcp.QdrantDB)**: High-performance vector database
+- **Ollama**: Local AI model hosting for embeddings

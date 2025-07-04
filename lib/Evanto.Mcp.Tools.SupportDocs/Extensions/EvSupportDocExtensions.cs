@@ -7,6 +7,7 @@ using Evanto.Mcp.Embeddings.Services;
 using Evanto.Mcp.QdrantDB.Contracts;
 using Evanto.Mcp.QdrantDB.Repository;
 using Evanto.Mcp.QdrantDB.Extensions;
+using Evanto.Mcp.Embeddings.Extensions;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Extensions;
 
@@ -25,13 +26,12 @@ public static class EvSupportDocExtensions
     {   // check requirements
         ArgumentNullException.ThrowIfNull(services, "Service collection must be valid!");
         ArgumentNullException.ThrowIfNull(settings, "Settings must be valid!");
-        ArgumentNullException.ThrowIfNull(settings.QdrantSettings, "Qdrant settings must be valid!");
-        ArgumentNullException.ThrowIfNull(settings.EmbeddingSettings, "Embedding settings must be valid!");
+        ArgumentNullException.ThrowIfNull(settings.Qdrant, "Qdrant settings must be valid!");
+        ArgumentNullException.ThrowIfNull(settings.Embeddings, "Embedding settings must be valid!");
 
         // register services
-        services.AddQdrantDocumentRepository(settings.QdrantSettings);
-
-        services.AddSingleton(settings.EmbeddingSettings);
+        services.AddQdrantDocumentRepository(settings.Qdrant);
+        services.AddEmbeddings(settings.Embeddings);
 
         return services;
     }

@@ -2,6 +2,7 @@
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportWizard.Extensions;
 using Evanto.Mcp.Tools.SupportDocs.Extensions;
+using System.Diagnostics;
 
 public class Program
 {
@@ -16,7 +17,9 @@ public class Program
         var settings                = appHelper.LoadConfiguration<EvMcpSrvAppSettings>();
         var (logger, loggerFactory) = appHelper.GetLogger(settings);
 
-         // Create a HostBuilder
+        logger.LogDebug($"Starting STDIO MCP Server with settings: {settings.ToJson()}");
+
+        // Create a HostBuilder
         var builder = Host.CreateApplicationBuilder(args);
 
         builder

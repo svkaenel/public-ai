@@ -1,4 +1,5 @@
-﻿using Evanto.Mcp.Common.Settings;
+﻿using System.Diagnostics;
+using Evanto.Mcp.Common.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
@@ -29,7 +30,27 @@ public class EvBaseAppHelper
             .Build();
 
         // Bind the configuration to RootConfiguration
-        return configuration.Get<T>() ?? new T();
+        var settings = new T();
+        configuration.Bind(settings);
+        
+        if (settings is EvMcpSrvAppSettings srvSettings)
+        {   // Manually bind nested sections for proper object creation
+            var qdrantSection = configuration.GetSection("Qdrant");
+            if (qdrantSection.Exists())
+            {
+                srvSettings.Qdrant = new EvQdrantSettings();
+                qdrantSection.Bind(srvSettings.Qdrant);
+            }
+
+            var embeddingSection = configuration.GetSection("Embeddings");
+            if (embeddingSection.Exists())
+            {
+                srvSettings.Embeddings = new EvEmbeddingSettings();
+                embeddingSection.Bind(srvSettings.Embeddings);
+            }
+        }
+        
+        return settings;
     }
 
     ///-------------------------------------------------------------------------------------------------

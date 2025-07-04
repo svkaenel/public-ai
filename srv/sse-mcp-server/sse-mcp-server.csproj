@@ -27,6 +27,12 @@
   <ProjectReference Include="../../lib/Evanto.Mcp.Tools.SupportWizard/Evanto.Mcp.Tools.SupportWizard.csproj" />
 </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 <PropertyGroup>
   <InvariantGlobalization>false</InvariantGlobalization>
 </PropertyGroup>

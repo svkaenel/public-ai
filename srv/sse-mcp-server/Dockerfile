@@ -11,7 +11,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /src
 
 # Copy solution file and project files
-RUN echo "Copying solution and project files V-0.1.5 ..."
+RUN echo "Copying solution and project files V-0.1.12 ..."
 
 COPY public-ai.sln .
 COPY Directory.Packages.props .
@@ -20,7 +20,8 @@ COPY Directory.Packages.props .
 COPY lib/Evanto.Mcp.Apps/Evanto.Mcp.Apps.csproj lib/Evanto.Mcp.Apps/
 COPY lib/Evanto.Mcp.Common/Evanto.Mcp.Common.csproj lib/Evanto.Mcp.Common/
 COPY lib/Evanto.Mcp.Embeddings/Evanto.Mcp.Embeddings.csproj lib/Evanto.Mcp.Embeddings/
-COPY lib/Evanto.Mcp.Qdrant/Evanto.Mcp.Qdrant.csproj lib/Evanto.Mcp.Qdrant/
+COPY lib/Evanto.Mcp.Pdfs/Evanto.Mcp.Pdfs.csproj lib/Evanto.Mcp.Pdfs/
+COPY lib/Evanto.Mcp.QdrantDB/Evanto.Mcp.QdrantDB.csproj lib/Evanto.Mcp.QdrantDB/
 COPY lib/Evanto.Mcp.Tools.SupportDocs/Evanto.Mcp.Tools.SupportDocs.csproj lib/Evanto.Mcp.Tools.SupportDocs/
 COPY lib/Evanto.Mcp.Tools.SupportWizard/Evanto.Mcp.Tools.SupportWizard.csproj lib/Evanto.Mcp.Tools.SupportWizard/
 COPY srv/sse-mcp-server/sse-mcp-server.csproj srv/sse-mcp-server/

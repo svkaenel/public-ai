@@ -273,8 +273,9 @@ public class EvDocumentRepository(
             else if (!String.IsNullOrWhiteSpace(query.QueryText))
             {
                 mLogger.LogDebug("Generating embedding for query: {Query}", query.QueryText);
+
                 queryVector = await mEmbeddingService.GenerateEmbeddingAsync(query.QueryText);
-                searchText = query.QueryText;
+                searchText  = query.QueryText;
             }
 
             else
