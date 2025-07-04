@@ -17,7 +17,7 @@ public class EvHostAppSettings : EvBaseAppSettings
     public EvChatClientSettings[]       Providers           { get; set; }         = Array.Empty<EvChatClientSettings>();
     public IList<EvMcpServerSettings>   McpServers          { get; set; }         = new List<EvMcpServerSettings>();
     public EvWebSettings                WebUI               { get; set; }         = new();
-    public float                        Temperature         { get; set; }         = 0.5f;
+    public float                        Temperature         { get; set; }         = 1.0f;
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Helper method to find a provider by name. </summary>

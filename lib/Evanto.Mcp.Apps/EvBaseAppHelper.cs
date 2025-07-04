@@ -148,11 +148,7 @@ public class EvBaseAppHelper
 
             if (rootConfig.UseConsoleLogging)
             {   // Add console logging
-                builder.AddConsole().AddConsoleFormatter<ConsoleFormatter, ConsoleFormatterOptions>(options =>
-                {
-                    options.IncludeScopes   = true;         // Include scopes in console output
-                    options.TimestampFormat = "HH:mm:ss ";  // Custom timestamp format
-                });
+                builder.AddConsole();
             }
 
             // Add debug logging for VS Code or K8S / Docker environments

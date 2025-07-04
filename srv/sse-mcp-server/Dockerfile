@@ -11,7 +11,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /src
 
 # Copy solution file and project files
-RUN echo "Copying solution and project files V-0.1.12 ..."
+RUN echo "Copying solution and project files V-0.1.14 ..."
 
 COPY public-ai.sln .
 COPY Directory.Packages.props .

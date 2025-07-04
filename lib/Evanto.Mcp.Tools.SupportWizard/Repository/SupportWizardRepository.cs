@@ -108,7 +108,7 @@ public class SupportWizardRepository : ISupportWizardRepository
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
                 .Where(sr => sr.CustomerEmail.ToLower() == customerEmail.ToLower())
-                .OrderByDescending(sr => sr.ReceivedAt)
+                // .OrderByDescending(sr => sr.ReceivedAt)
                 .ToListAsync();
 
             mLogger.LogInformation("Found {Count} support requests for customer email {CustomerEmail}", 
@@ -142,7 +142,7 @@ public class SupportWizardRepository : ISupportWizardRepository
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
                 .Where(sr => sr.CustomerName.ToLower().Contains(customerName.ToLower()))
-                .OrderByDescending(sr => sr.ReceivedAt)
+                // .OrderByDescending(sr => sr.ReceivedAt)
                 .ToListAsync();
 
             mLogger.LogInformation("Found {Count} support requests for customer name containing '{CustomerName}'", 
@@ -297,6 +297,7 @@ public class SupportWizardRepository : ISupportWizardRepository
         {
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
+                // .OrderByDescending(sr => sr.ReceivedAt)
                 .Skip(skip)
                 .Take(take)
                 .ToListAsync();
@@ -329,7 +330,7 @@ public class SupportWizardRepository : ISupportWizardRepository
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
                 .Where(sr => sr.Status == status)
-                .OrderByDescending(sr => sr.ReceivedAt)
+                // .OrderByDescending(sr => sr.ReceivedAt)
                 .ToListAsync();
 
             mLogger.LogInformation("Found {Count} support requests with status {Status}", requests.Count, status);
@@ -359,7 +360,7 @@ public class SupportWizardRepository : ISupportWizardRepository
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
                 .Where(sr => sr.Topic == topic)
-                .OrderByDescending(sr => sr.ReceivedAt)
+                // .OrderByDescending(sr => sr.ReceivedAt)
                 .ToListAsync();
 
             mLogger.LogInformation("Found {Count} support requests with topic {Topic}", requests.Count, topic);
@@ -389,7 +390,7 @@ public class SupportWizardRepository : ISupportWizardRepository
             var requests = await mContext.SupportRequests
                 .Include(sr => sr.AssignedToUser)
                 .Where(sr => sr.Priority == priority)
-                .OrderByDescending(sr => sr.ReceivedAt)
+                // .OrderByDescending(sr => sr.ReceivedAt)
                 .ToListAsync();
 
             mLogger.LogInformation("Found {Count} support requests with priority {Priority}", requests.Count, priority);

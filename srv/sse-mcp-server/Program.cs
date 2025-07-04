@@ -60,7 +60,7 @@ public class Program
             logger.LogError("Failed to access the support wizard database. Please check your configuration.");
         }
 
-        if (!await app.TestSupportDocsAccessAsync("test"))
+        if (!await app.TestSupportDocsAccessAsync("Embeddings"))
         {   // Test DB access failed
             logger.LogError("Failed to access the support documentation database. Please check your configuration.");
         }

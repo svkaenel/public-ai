@@ -48,6 +48,11 @@ public class Program
             logger.LogError("Failed to access the database. Please check your configuration.");
         }
 
+        if (!await app.TestSupportDocsAccessAsync("Embeddings"))
+        {   // Test DB access failed
+            logger.LogError("Failed to access the support documentation database. Please check your configuration.");
+        }
+
         await app.RunAsync();
     }
 
