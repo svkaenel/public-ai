@@ -10,8 +10,6 @@
 
   <ItemGroup>
     <!-- Core libraries -->
-    <PackageReference Include="BoxOfYellow.ConsoleMarkdownRenderer" />
-    <PackageReference Include="Markdig" />
     <PackageReference Include="Microsoft.Extensions.AI" />
     <PackageReference Include="Microsoft.Extensions.Configuration" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
@@ -21,9 +19,6 @@
     <!-- OpenAI client support -->
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
-    
-    <!-- Test packages -->
-    <PackageReference Include="Spectre.Console" />
     
     <!-- OpenTelemetry packages -->
     <PackageReference Include="OpenTelemetry" />

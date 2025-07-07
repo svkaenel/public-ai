@@ -13,38 +13,9 @@ public class EvHostAppSettings : EvBaseAppSettings
 {
     public String                       SelectedProvider    { get; private set; } = String.Empty;
     public String                       SelectedModel       { get; private set; } = String.Empty;
-    public String                       DefaultProvider     { get; set; }         = "Ionos";
-    public EvChatClientSettings[]       Providers           { get; set; }         = Array.Empty<EvChatClientSettings>();
     public IList<EvMcpServerSettings>   McpServers          { get; set; }         = new List<EvMcpServerSettings>();
     public EvWebSettings                WebUI               { get; set; }         = new();
-    public float                        Temperature         { get; set; }         = 1.0f;
-
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Helper method to find a provider by name. </summary>
-    ///
-    /// <remarks>   SvK, 23.06.2025. </remarks>
-    ///
-    /// <param name="providerName"> The name of the provider. </param>
-    ///
-    /// <returns>   The provider configuration or null if not found. </returns>
-    ///-------------------------------------------------------------------------------------------------
-    public EvChatClientSettings? GetProvider(String providerName)
-    {
-        return Providers?.FirstOrDefault(p => String.Equals(p.ProviderName, providerName, StringComparison.OrdinalIgnoreCase));
-    }
-
-    ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Helper method to get the default provider. </summary>
-    ///
-    /// <remarks>   SvK, 23.06.2025. </remarks>
-    ///
-    /// <returns>   The default provider configuration or null if not found. </returns>
-    ///-------------------------------------------------------------------------------------------------
-    public EvChatClientSettings? GetDefaultProvider()
-    {
-        return GetProvider(DefaultProvider);
-    }
-
+    public Single                       Temperature         { get; set; }         = 1.0f;
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Setzt den ausgewählten Provider. </summary>
     ///
@@ -55,9 +26,9 @@ public class EvHostAppSettings : EvBaseAppSettings
     ///-------------------------------------------------------------------------------------------------    
     public void SetSelectedProvider(String? overrideProvider)
     {
-        SelectedProvider = String.IsNullOrEmpty(overrideProvider) ? DefaultProvider : overrideProvider;
+        SelectedProvider = String.IsNullOrEmpty(overrideProvider) ? DefaultChatClient : overrideProvider;
 
-        var provider = GetProvider(SelectedProvider);
+        var provider = GetChatClient(SelectedProvider);
         if (provider == null)
             throw new InvalidOperationException($"Provider '{SelectedProvider}' not found in configuration.");
     }
@@ -71,7 +42,7 @@ public class EvHostAppSettings : EvBaseAppSettings
     ///-------------------------------------------------------------------------------------------------
     public void SetSelectedModel(String? overrideModel)
     {
-        SelectedModel = String.IsNullOrEmpty(overrideModel) ? GetDefaultProvider()?.DefaultModel ?? String.Empty : overrideModel;
+        SelectedModel = String.IsNullOrEmpty(overrideModel) ? GetDefaultChatClient()?.DefaultModel ?? String.Empty : overrideModel;
     }
 }
 

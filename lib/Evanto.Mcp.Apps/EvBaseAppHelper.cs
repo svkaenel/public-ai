@@ -1,8 +1,6 @@
-﻿using System.Diagnostics;
-using Evanto.Mcp.Common.Settings;
+﻿using Evanto.Mcp.Common.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
@@ -161,7 +159,7 @@ public class EvBaseAppHelper
         });
 
         // Return the logger instance
-        return (loggerFactory.CreateLogger("Brunner.Mcp.CommandLineClient"), loggerFactory);
+        return (loggerFactory.CreateLogger("Evanto.Mcp"), loggerFactory);
     }
 
     ///-------------------------------------------------------------------------------------------------

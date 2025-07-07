@@ -1,6 +1,5 @@
 ﻿// Program.cs
 using Evanto.Mcp.Apps;
-using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Vectorize.Contracts;
 using Evanto.Mcp.Vectorize.Extensions;
 using Evanto.Mcp.Vectorize.Settings;
@@ -38,7 +37,7 @@ public class Program
 
         try
         {   // create and build host
-            var host = CreateHostBuilder(args, settings);
+            var host = CreateHostBuilder(args, loggerFactory, settings);
             var app  = host.Build(); // assemble all
 
             using var scope         = app.Services.CreateScope();
@@ -73,13 +72,15 @@ public class Program
     /// <remarks>   SvK, 03.07.2025. </remarks>
     ///
     /// <param name="args">   The command line arguments. </param>
+    /// <param name="loggerFactory">   The logger factory to use for logging. </param>
+    /// <param name="settings"> The application settings containing provider configuration. </param>
     ///
     /// <returns>   The configured host builder. </returns>
     ///-------------------------------------------------------------------------------------------------
-    private static IHostBuilder CreateHostBuilder(String[] args, EvVectorizeAppSettings settings) 
+    private static IHostBuilder CreateHostBuilder(String[] args, ILoggerFactory loggerFactory, EvVectorizeAppSettings settings) 
     {   // check requirements
         ArgumentNullException.ThrowIfNull(settings);
-        ArgumentNullException.ThrowIfNull(settings.Embeddings);
+        ArgumentNullException.ThrowIfNull(settings.EmbeddingProviders);
         ArgumentNullException.ThrowIfNull(settings.Qdrant);
 
         return Host.CreateDefaultBuilder(args)
@@ -89,7 +90,7 @@ public class Program
                 services.AddPdfVectorizationServices();
 
                 // Register embedding service
-                services.AddEmbeddings(settings.Embeddings);
+                services.AddEmbeddings(loggerFactory, settings);
 
                 // Register Qdrant document repository
                 services.AddQdrantDocumentRepository(settings.Qdrant);
@@ -97,7 +98,6 @@ public class Program
                 // Register iText PDF text extractor service
                 services.AddPdfTextExtractor();
 
-                services.AddSingleton(settings.Embeddings);
                 services.AddSingleton(settings.Qdrant);
             });
     }

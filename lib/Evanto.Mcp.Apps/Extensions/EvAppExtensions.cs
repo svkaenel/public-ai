@@ -1,5 +1,4 @@
 using System;
-using ConsoleMarkdownRenderer;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -11,9 +10,11 @@ public static class EvAppExtensions
     /// <summary>   Logs the output message to both the logger and console. </summary>
     ///
     /// <remarks>   SvK, 23.06.2025. </remarks>
+    /// 
     /// <param name="logger">   The logger instance to extend. </param>
     /// <param name="message">  The message to log and display. </param>
     /// <param name="args">     Optional arguments for formatting the message. </param>
+    /// 
     /// <returns>   A Task representing the asynchronous operation. </returns>
     ///-------------------------------------------------------------------------------------------------
     // [DebuggerStepThrough]
@@ -24,22 +25,10 @@ public static class EvAppExtensions
             logger.LogInformation(message, args);
         }
 
-        try
-        {   // fails, if markdown parsing fails
-            if (args.Length > 0)
-            {
-                message = String.Format(message, args);
-            }
+        // if necessary also a markdown renderer like MarkDig can be used
+        Console.WriteLine(message, args);
 
-            await Displayer.DisplayMarkdownAsync(message, options: new DisplayOptions
-            {
-            });
-        }
-
-        catch (Exception)
-        {   // If markdown rendering fails, log the error and display raw response
-            Console.WriteLine(message, args);
-        }
+        await Task.CompletedTask; // ensure method is async (for e.g. markdown rendering)
     }
 
     ///-------------------------------------------------------------------------------------------------

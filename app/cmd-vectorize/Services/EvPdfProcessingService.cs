@@ -142,8 +142,12 @@ public class EvPdfProcessingService(
                 return result;
             }
 
+            var embeddingProvider = mSettings.GetDefaultEmbeddingProvider();
+
+            ArgumentNullException.ThrowIfNull(embeddingProvider, "No default embedding provider configured");
+
             // chunk text
-            var chunks = mTextExtractor.ChunkText(text, mSettings.Embeddings!.ChunkSize, mSettings.Embeddings!.ChunkOverlap);
+            var chunks = mTextExtractor.ChunkText(text, embeddingProvider.ChunkSize, embeddingProvider.ChunkOverlap);
 
             if (chunks == null || !chunks.Any()) // added null check for safety
             {   // no chunks created

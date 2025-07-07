@@ -1,34 +1,34 @@
 using System;
 using System.ClientModel;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Protocol;
 using OpenAI;
 using Azure;
-using Azure.AI.Inference;
 using Microsoft.Extensions.AI;
 using Azure.AI.OpenAI;
 using Evanto.Mcp.Common.Settings;
+using Evanto.Mcp.Embeddings.Extensions;
+using Azure.AI.Inference;
+using OllamaSharp;
 
-namespace Evanto.Mcp.Host.Factories;
+namespace Evanto.Mcp.Embeddings.Factories;
 
-public class EvChatClientFactory(ILoggerFactory loggerFactory)
+public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> logger)
 {
-    private readonly ILoggerFactory                 mLoggerFactory  = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
-    private readonly ILogger<EvChatClientFactory>   mLogger         = loggerFactory.CreateLogger<EvChatClientFactory>();
+    private readonly ILogger<EvEmbeddingGeneratorFactory>   mLogger     = logger ?? throw new ArgumentNullException(nameof(logger));
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Creates an instance of the ChatClientFactory. </summary>
+    /// <summary>   Creates an instance of the EvEmbeddingGeneratorFactory. </summary>
     ///
     /// <remarks>   SvK, 23.06.2025. </remarks>
     /// <param name="loggerFactory">    Logger factory for output. </param>
-    /// <returns>   A new instance of ChatClientFactory. </returns>
+    /// <returns>   A new instance of EvEmbeddingGeneratorFactory. </returns>
     /// <exception cref="ArgumentNullException">    When loggerFactory is null. </exception>
     ///-------------------------------------------------------------------------------------------------
-    public static EvChatClientFactory Create(ILoggerFactory loggerFactory)
+    public static EvEmbeddingGeneratorFactory Create(ILoggerFactory loggerFactory)
     {
         ArgumentNullException.ThrowIfNull(loggerFactory);
 
-        return new EvChatClientFactory(loggerFactory);
+        return new EvEmbeddingGeneratorFactory(loggerFactory.CreateLogger<EvEmbeddingGeneratorFactory>());
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -37,12 +37,12 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     ///
     /// <param name="rootConfig">      The root configuration containing the selected provider and model. </param>
     /// 
-    /// <returns>   The configured IChatClient. </returns>
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>>. </returns>
     /// 
     /// <exception cref="ArgumentNullException">    When rootConfig is null. </exception>
     /// <exception cref="InvalidOperationException"> When the selected provider is not found in the configuration. </exception>
     ///-------------------------------------------------------------------------------------------------
-    public IChatClient CreateChatClient(EvHostAppSettings rootConfig)
+    public IEmbeddingGenerator<String, Embedding<Single>> CreateChatClient(EvHostAppSettings rootConfig)
     {   // check requirements
         ArgumentNullException.ThrowIfNull(rootConfig);
         ArgumentNullException.ThrowIfNull(mLogger);
@@ -61,11 +61,11 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
         modelName = modelName ?? settings.DefaultModel;
 
-        return CreateChatClient(settings, modelName, rootConfig.Telemetry);
+        return CreateEmbeddingGenerator(settings, modelName, rootConfig.Telemetry);
     }
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Creates a chat client based on the configuration. </summary>
+    /// <summary>   Creates a embedding client based on the configuration. </summary>
     ///
     /// <remarks>   SvK, 01.07.2025. </remarks>
     /// 
@@ -75,8 +75,10 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// 
     /// <exception cref="ArgumentNullException">    When configuration is null. </exception>
     /// <exception cref="InvalidOperationException"> When an unknown provider is configured. </exception>
+    /// 
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>>. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public IChatClient CreateChatClient(EvChatClientSettings settings, String modelName, EvTelemetrySettings? telemetrySettings = null)
+    public IEmbeddingGenerator<String, Embedding<Single>> CreateEmbeddingGenerator(EvChatClientSettings settings, String modelName, EvTelemetrySettings? telemetrySettings = null)
     {   // check requirements
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(mLogger);
@@ -103,53 +105,75 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
         return settings.ProviderName.ToUpperInvariant() switch
         {
-            "OPENAI"   => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
-            "IONOS"    => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
-            "LMSTUDIO" => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
-            "OLLAMA"   => CreateOllamaChatClient(settings, modelName, telemetryEnabled),
-            "AZURE"    => CreateAzureChatClient(settings, modelName, telemetryEnabled),
-            "AZUREOAI" => CreateAzureOpenAIChatClient(settings, modelName, telemetryEnabled),
-            _          => throw new InvalidOperationException(
-                            $"Unknown chat client type: {settings.ProviderName}. " +
+            "OPENAI"      => CreateOpenAIEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            "IONOS"       => CreateOpenAIEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            "LMSTUDIO"    => CreateOpenAIEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            "OLLAMA"      => CreateOllamaEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            "OLLAMASHARP" => CreateOllamaSharpEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            "AZURE"       => CreateAzureEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            "AZUREOAI"    => CreateAzureOpenAIEmbeddingGenerator(settings, modelName, telemetryEnabled),
+            _             => throw new InvalidOperationException(
+                            $"Unknown provider type: {settings.ProviderName}. " +
                             "Supported types: 'OpenAI', 'Ionos', 'LMStudio', 'Ollama', 'Azure', 'AzureOAI'.")
         };
     }
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Creates an Ollama chat client. </summary>
+    /// <summary>   Creates an Ollama embedding client. </summary>
     ///
     /// <remarks>   SvK, 01.07.2025. </remarks>
     /// <param name="settings">           The provider settings for Ollama. </param>
-    /// <param name="modelName">          The name of the model to use. </param>
+    /// <param name="embeddingModelName">          The name of the model to use. </param>
     /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
     ///
-    /// <returns>   The configured IChatClient for Ollama. </returns>
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>> for Ollama. </returns>
     /// <exception cref="InvalidOperationException">    When creating the Ollama client fails. </exception>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateOllamaChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
+    private IEmbeddingGenerator<String, Embedding<Single>> CreateOllamaEmbeddingGenerator(EvChatClientSettings settings, String embeddingModelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
             ArgumentNullException.ThrowIfNull(settings);
-            ArgumentNullException.ThrowIfNull(modelName);
+            ArgumentNullException.ThrowIfNull(embeddingModelName);
 
-            // Create Ollama client with Microsoft.Extensions.AI.Ollama
-            var ollamaClient = new OllamaChatClient(settings.Endpoint, modelName);
+            // Create Ollama generator with Microsoft.Extensions.AI.Ollama (deprecated)
+            var generator = new OllamaEmbeddingGenerator(
+                new Uri(settings.Endpoint),
+                embeddingModelName);
 
-            // Wrap with additional features
-            var chatClientBuilder = new ChatClientBuilder(ollamaClient)
-                .UseLogging(mLoggerFactory);
+            return generator.Build(settings);
+        }
 
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to create Ollama chat client: {ex.Message}", ex);
+        }
+    }
 
-            var chatClient = chatClientBuilder
-                .UseFunctionInvocation()
-                .Build();
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Creates an Ollama sharp embedding client. </summary>
+    ///
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    /// <param name="settings">           The provider settings for Ollama. </param>
+    /// <param name="embeddingModelName">          The name of the model to use. </param>
+    /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
+    ///
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>> for Ollama. </returns>
+    /// <exception cref="InvalidOperationException">    When creating the Ollama client fails. </exception>
+    ///-------------------------------------------------------------------------------------------------
+    private IEmbeddingGenerator<String, Embedding<Single>> CreateOllamaSharpEmbeddingGenerator(EvChatClientSettings settings, String embeddingModelName, Boolean telemetryEnabled = false)
+    {
+        try
+        {   // check requirements
+            ArgumentNullException.ThrowIfNull(settings);
+            ArgumentNullException.ThrowIfNull(embeddingModelName);
 
-            return chatClient;
+            // Create Ollama generator with OllamaSharp
+            var generator = new OllamaApiClient(
+                new Uri(settings.Endpoint),
+                embeddingModelName);
+
+            return generator.Build(settings);
         }
 
         catch (Exception ex)
@@ -167,9 +191,9 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <param name="modelName">          The name of the model to use. </param>
     /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
     ///
-    /// <returns>   The configured IChatClient. </returns>
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>>. </returns>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateOpenAIChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
+    private IEmbeddingGenerator<String, Embedding<Single>> CreateOpenAIEmbeddingGenerator(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
@@ -185,25 +209,11 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
                 }
             );
 
-            var chatClient = openAiClient.GetChatClient(modelName).AsIChatClient();
+            var generator = openAiClient
+                .GetEmbeddingClient(settings.DefaultModel)
+                .AsIEmbeddingGenerator();
 
-            // build chat client with additional features
-            var chatClientBuilder = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var finalChatClient = chatClientBuilder
-                .UseFunctionInvocation(mLoggerFactory, client =>
-                {
-                    client.IncludeDetailedErrors = true; // Include detailed errors in function invocation
-                })
-                .Build();
-
-            return finalChatClient;
+            return generator.Build(settings);
         }
 
         catch (Exception ex)
@@ -221,10 +231,10 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <param name="modelName">          The name of the model to use. </param>
     /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
     /// 
-    /// <returns>   The configured IChatClient for Azure OpenAI. </returns>
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>> for Azure OpenAI. </returns>
     /// <exception cref="InvalidOperationException">    When creating the Azure OpenAI client fails. </exception>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateAzureOpenAIChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
+    private IEmbeddingGenerator<String, Embedding<Single>> CreateAzureOpenAIEmbeddingGenerator(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
@@ -237,22 +247,11 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
                 new AzureKeyCredential(settings.ApiKey)
             );
 
-            var chatClient = azureOpenAiClient.GetChatClient(modelName).AsIChatClient();
+            var generator = azureOpenAiClient
+                .GetEmbeddingClient(settings.DefaultModel)
+                .AsIEmbeddingGenerator();
 
-            // build chat client with additional features
-            var chatClientBuilder = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var finalChatClient = chatClientBuilder
-                .UseFunctionInvocation()
-                .Build();
-
-            return finalChatClient;
+            return generator.Build(settings);
         }
 
         catch (Exception ex)
@@ -269,11 +268,11 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <param name="modelName">          The name of the model to use. </param>
     /// <param name="telemetrySettings">  Optional. The telemetry settings for OpenTelemetry integration. </param>
     /// 
-    /// <returns>   The configured IChatClient for Azure Inference. </returns>
+    /// <returns>   The configured IEmbeddingGenerator<String, Embedding<Single>> for Azure Inference. </returns>
     /// 
     /// <exception cref="InvalidOperationException">    When creating the Azure Inference client fails. </exception>
     ///-------------------------------------------------------------------------------------------------
-    private IChatClient CreateAzureChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
+    private IEmbeddingGenerator<String, Embedding<Single>> CreateAzureEmbeddingGenerator(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
     {
         try
         {   // check requirements
@@ -284,7 +283,7 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
             var credential = new AzureKeyCredential(settings.ApiKey);
 
             // ❸ Basisklient des Azure.AI.Inference-SDK
-            var inferenceClient = new ChatCompletionsClient(
+            var inferenceClient = new EmbeddingsClient(
                 endpoint,
                 credential,
                 new AzureAIInferenceClientOptions(
@@ -292,23 +291,9 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
                 )
             );
 
-            // ❄ In ein IChatClient der Microsoft.Extensions.AI-Welt umwandeln
-            var chatClient = inferenceClient.AsIChatClient(modelName);
+            var generator = inferenceClient.AsIEmbeddingGenerator();
 
-            // build chat client with additional features
-            var chatClientBuilder = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var finalChatClient = chatClientBuilder
-                .UseFunctionInvocation()
-                .Build();
-
-            return finalChatClient;
+            return generator.Build(settings);
         }
 
         catch (Exception ex)
@@ -318,11 +303,11 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     }
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Tests the connection to the chat client. </summary>
+    /// <summary>   Tests the connection to the embedding client. </summary>
     ///
     /// <remarks>   SvK, 03.06.2025. </remarks>
     ///
-    /// <param name="chatClient">       The chat client to test. </param>
+    /// <param name="embeddingClient">  The embedding client to test. </param>
     /// <param name="tools">            Available MCP tools. </param>
     /// <param name="logger">           Logger for output. </param>
     /// <param name="cancellationToken"> Cancellation token. </param>
@@ -330,17 +315,17 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <returns>   True if the connection is successful. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<Boolean> TestConnectionAsync(
-        IChatClient       chatClient,
-        CancellationToken cancellationToken = default,
-        Int32             timeoutSeconds    = 60)
+        IEmbeddingGenerator<String, Embedding<Single>>  embeddingClient,
+        CancellationToken                               cancellationToken = default,
+        Int32                                           timeoutSeconds    = 60)
     {
         try
         {   // check requirements
-            ArgumentNullException.ThrowIfNull(chatClient);
+            ArgumentNullException.ThrowIfNull(embeddingClient);
             ArgumentNullException.ThrowIfNull(mLogger);
 
             // Test connection with simple message
-            mLogger.LogInformation("🧪 Testing {Provider} connection...", chatClient.ToString());
+            mLogger.LogInformation("🧪 Testing {Provider} connection...", embeddingClient.ToString());
 
             var testMessages = new[]
             {
@@ -353,21 +338,17 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
             cts.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
 
-            var response = await chatClient.GetResponseAsync(
-                testMessages,
-                new ChatOptions(),
-                cancellationToken: cts.Token
-            );
+            var response = await embeddingClient.GenerateAsync("Test");
 
             mLogger.LogInformation("✅ {Provider} connection test successful: {Response}",
-                chatClient.ToString(), response.Text?.Trim());
+                embeddingClient.ToString(), String.Join(",", response.Vector));
 
             return true;
         }
 
         catch (Exception ex)
         {
-            mLogger.LogError(ex, "❌ {Provider} connection test failed", chatClient?.ToString());
+            mLogger.LogError(ex, "❌ {Provider} connection test failed", embeddingClient?.ToString());
             return false;
         }
     }

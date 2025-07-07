@@ -33,8 +33,8 @@ public class EvMcpServerTester(ILogger logger)
     /// <returns>   The test result. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<EvMcpTestResult> TestServerAsync(
-        EvMcpClientInfo                   mcpClientInfo,
-        IList<EvMcpToolTestSettings> toolTests,
+        EvMcpClientInfo                 mcpClientInfo,
+        IList<EvMcpToolTestSettings>    toolTests,
         Boolean                         quickTest = false)
     {
         var serverStopwatch = Stopwatch.StartNew();
@@ -137,7 +137,7 @@ public class EvMcpServerTester(ILogger logger)
             // Call the tool
             var callResult          = await client.CallToolAsync(tool.Name ?? "Unknown", parameters);
 
-            if (callResult.IsError)
+            if (callResult.IsError.HasValue && callResult.IsError.Value)
             {
                 result.Success      = false;
                 result.ErrorMessage = "Error calling tool: " + result.ToolName;

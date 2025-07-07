@@ -8,6 +8,7 @@ using Evanto.Mcp.QdrantDB.Contracts;
 using Evanto.Mcp.QdrantDB.Repository;
 using Evanto.Mcp.QdrantDB.Extensions;
 using Evanto.Mcp.Embeddings.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Evanto.Mcp.Tools.SupportDocs.Extensions;
 
@@ -18,20 +19,21 @@ public static class EvSupportDocExtensions
     /// <summary>   Adds support documentation services to the specified service collection. </summary>
     /// <remarks>   SvK, 03.06.2025. </remarks>
     /// 
-    /// <param name="services">   The service collection to extend. </param>
+    /// <param name="services">         The service collection to extend. </param>
+    /// <param name="loggerFactory">    The logger factory to use for logging. </param>
+    /// <param name="settings">         The application settings containing Qdrant and embedding configurations
     ///
     /// <returns>   The service collection with the added support documentation services. </returns>
     ///------------------------------------------------------------------------------------------------
-    public static IServiceCollection AddSupportDocs(this IServiceCollection services, EvMcpSrvAppSettings settings)
+    public static IServiceCollection AddSupportDocs(this IServiceCollection services, ILoggerFactory loggerFactory, EvMcpSrvAppSettings settings)
     {   // check requirements
         ArgumentNullException.ThrowIfNull(services, "Service collection must be valid!");
         ArgumentNullException.ThrowIfNull(settings, "Settings must be valid!");
         ArgumentNullException.ThrowIfNull(settings.Qdrant, "Qdrant settings must be valid!");
-        ArgumentNullException.ThrowIfNull(settings.Embeddings, "Embedding settings must be valid!");
 
         // register services
         services.AddQdrantDocumentRepository(settings.Qdrant);
-        services.AddEmbeddings(settings.Embeddings);
+        services.AddEmbeddings(loggerFactory, settings);
 
         return services;
     }

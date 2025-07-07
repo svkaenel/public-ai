@@ -54,7 +54,7 @@ public static class EvSupportWizardExtensions
     }
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Tests the brunner product registration database access. </summary>
+    /// <summary>   Tests the support wizard database access. </summary>
     ///
     /// <remarks>   SvK, 03.06.2025. </remarks>
     ///
@@ -157,7 +157,7 @@ public static class EvSupportWizardExtensions
         // Initialize SQLite with system provider for Alpine Linux containers
         SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());
 
-        // add mybrunner + zbv database with minimal logging
+        // add support wizard database with minimal logging
         builder.Services.AddDbContext<SupportWizardDbContext>(options =>
         {
             options.UseSqlite(connectDB);

@@ -4,50 +4,52 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- https://www.milanjovanovic.tech/blog/central-package-management-in-net-simplify-nuget-dependencies -->
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.6" />
+    <!-- Entity Framework -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.6" />
+    <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="9.0.6" />
+    <!-- Microsoft.Extensions.AI -->
     <PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="9.6.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="9.5.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.5.0-preview.1.25265.7" />
-    <PackageVersion Include="Microsoft.Extensions.AI.Ollama" Version="9.5.0-preview.1.25265.7" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.5" />
-    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.1" />
-    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
-    <PackageVersion Include="ModelContextProtocol" Version="0.3.0-preview.1" />
-    <PackageVersion Include="OllamaSharp" Version="5.1.19" />
-    <PackageVersion Include="Qdrant.Client" Version="1.14.0" />
-    <PackageVersion Include="itext7" Version="9.2.0" />
-    <PackageVersion Include="BoxOfYellow.ConsoleMarkdownRenderer" Version="0.7.1" />
-    <PackageVersion Include="Markdig" Version="0.41.1" />
-    <PackageVersion Include="Spectre.Console" Version="0.50.0" />
-    <PackageVersion Include="xunit" Version="2.4.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="9.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.6.0-preview.1.25310.2" />
+    <PackageVersion Include="Microsoft.Extensions.AI.Ollama" Version="9.6.0-preview.1.25310.2" />
+    <!-- ModelContextProtocol -->
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.2" />
+    <PackageVersion Include="ModelContextProtocol" Version="0.3.0-preview.2" />
+    <!-- Logging and Debugging -->
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
     <PackageVersion Include="System.ClientModel.Primitives" Version="1.2.1" />
+    <!-- AI and Inference packages -->
+    <PackageVersion Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.6.0-preview.1.25310.2" />
     <PackageVersion Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
-    <PackageVersion Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.5.0-preview.1.25262.9" />
     <PackageVersion Include="Azure.Identity" Version="1.14.0" />
     <PackageVersion Include="Azure.AI.OpenAI" Version="2.2.0-beta.4" />
+    <!-- Open Telemetry -->
     <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.5" />
-    <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="9.0.5" />
+    <!-- OllamaSharp etc. -->
+    <PackageVersion Include="OllamaSharp" Version="5.1.19" />
+    <PackageVersion Include="Qdrant.Client" Version="1.14.0" />
+    <PackageVersion Include="itext7" Version="9.2.0" />
+    <!-- SQLite packages for Alpine Deployment -->
     <PackageVersion Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.11" /> 
     <PackageVersion Include="SQLitePCLRaw.core" Version="2.1.11" />
 

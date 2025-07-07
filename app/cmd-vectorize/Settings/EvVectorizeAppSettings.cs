@@ -13,6 +13,5 @@ public class EvVectorizeAppSettings : EvBaseAppSettings
     public           String                     PdfDirectory            { get; set; } = "./pdfs";
     public           String                     FullPdfDirectory        { get => PdfDirectory.ResolveRelative(); }
     public           String                     TrackingFilePath        { get; set; } = "./processed_files.json";
-    public           EvEmbeddingSettings?       Embeddings              { get; set; } = null;
     public           EvQdrantSettings?          Qdrant                  { get; set; } = null;
 }

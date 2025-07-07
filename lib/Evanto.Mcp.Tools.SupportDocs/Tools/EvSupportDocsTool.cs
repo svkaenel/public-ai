@@ -37,11 +37,12 @@ public class EvSupportDocsTool(IEvDocumentRepository documentRepository) : EvMcp
     }
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>Finde Informationen zu BRUNNER Produkten in Anleitungen und Dokumentationen.</summary>
+    /// <summary>Gets information from support documentation.</summary>
     ///
     /// <param name="query"> The Frage. </param>
     ///
-    /// <returns> Informationen zu BRUNNER Produkten in Anleitungen und Dokumentationen. </returns>
+    /// <returns> A JSON string representing the search results, or an error message if no documents 
+    /// are found. </returns>
     ///-------------------------------------------------------------------------------------------------
     [McpServerTool, Description("Get information from support documentation. Result is a list of documentation chunks that match the query.")]
     public async Task<String> GetInfosFromDocumentation(String query)

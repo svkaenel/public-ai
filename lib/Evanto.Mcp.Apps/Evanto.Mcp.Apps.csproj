@@ -25,10 +25,6 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 
-    <!-- Console Markdown formatting -->
-    <PackageReference Include="BoxOfYellow.ConsoleMarkdownRenderer" />
-    <PackageReference Include="Markdig" />
-
     <!-- AI and Inference packages -->
     <PackageReference Include="ModelContextProtocol" />
   </ItemGroup>

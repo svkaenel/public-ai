@@ -210,12 +210,12 @@ public class EvCmdAppHelper : EvBaseAppHelper
         try
         {   // Lade Chat-Client-Konfiguration direkt aus der ChatClient Sektion
             Console.WriteLine("🔍 Verfügbare Provider und Modelle:");
-            Console.WriteLine($"   Standard-Provider: {rootConfig.DefaultProvider}");
+            Console.WriteLine($"   Standard-Provider: {rootConfig.DefaultChatClient}");
             Console.WriteLine();
 
-            if (rootConfig.Providers.Any())
+            if (rootConfig.ChatClients.Any())
             {
-                foreach (var provider in rootConfig.Providers)
+                foreach (var provider in rootConfig.ChatClients)
                 {
                     var providerName    = provider.ProviderName;
                     var endpoint        = provider.Endpoint;
@@ -249,7 +249,7 @@ public class EvCmdAppHelper : EvBaseAppHelper
     ///-------------------------------------------------------------------------------------------------
     public void ShowHelp()
     {
-        Console.WriteLine("📖 Brunner MCP Command Line Client - Verfügbare Parameter:");
+        Console.WriteLine("📖 Evanto MCP Command Line Client - Verfügbare Parameter:");
         Console.WriteLine();
         Console.WriteLine("  --test             Führt MCP Server Tests durch");
         Console.WriteLine("  --think            Zeigt <think>-Knoten in Chat-Antworten an");

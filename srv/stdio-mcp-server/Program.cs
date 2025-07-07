@@ -26,7 +26,7 @@ public class Program
             .AddSupportWizard();
 
         builder.Services
-            .AddSupportDocs(settings)
+            .AddSupportDocs(loggerFactory, settings)
             .AddMcpServer()
             .WithStdioServerTransport()
             .WithSupportWizardMcpTools()
