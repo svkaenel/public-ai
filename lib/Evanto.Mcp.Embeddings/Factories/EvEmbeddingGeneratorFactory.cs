@@ -12,9 +12,10 @@ using OllamaSharp;
 
 namespace Evanto.Mcp.Embeddings.Factories;
 
-public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> logger)
+public class EvEmbeddingGeneratorFactory(ILoggerFactory loggerFactory)
 {
-    private readonly ILogger<EvEmbeddingGeneratorFactory>   mLogger     = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILoggerFactory                         mLoggerFactory  = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+    private readonly ILogger<EvEmbeddingGeneratorFactory>   mLogger         = loggerFactory.CreateLogger<EvEmbeddingGeneratorFactory>() ?? throw new ArgumentNullException(nameof(loggerFactory));
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Creates an instance of the EvEmbeddingGeneratorFactory. </summary>
@@ -28,7 +29,7 @@ public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> lo
     {
         ArgumentNullException.ThrowIfNull(loggerFactory);
 
-        return new EvEmbeddingGeneratorFactory(loggerFactory.CreateLogger<EvEmbeddingGeneratorFactory>());
+        return new EvEmbeddingGeneratorFactory(loggerFactory);
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -141,7 +142,7 @@ public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> lo
                 new Uri(settings.Endpoint),
                 embeddingModelName);
 
-            return generator.Build(settings);
+            return generator.Build(mLoggerFactory, settings);
         }
 
         catch (Exception ex)
@@ -173,7 +174,7 @@ public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> lo
                 new Uri(settings.Endpoint),
                 embeddingModelName);
 
-            return generator.Build(settings);
+            return generator.Build(mLoggerFactory, settings);
         }
 
         catch (Exception ex)
@@ -213,7 +214,7 @@ public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> lo
                 .GetEmbeddingClient(settings.DefaultModel)
                 .AsIEmbeddingGenerator();
 
-            return generator.Build(settings);
+            return generator.Build(mLoggerFactory, settings);
         }
 
         catch (Exception ex)
@@ -251,7 +252,7 @@ public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> lo
                 .GetEmbeddingClient(settings.DefaultModel)
                 .AsIEmbeddingGenerator();
 
-            return generator.Build(settings);
+            return generator.Build(mLoggerFactory, settings);
         }
 
         catch (Exception ex)
@@ -293,7 +294,7 @@ public class EvEmbeddingGeneratorFactory(ILogger<EvEmbeddingGeneratorFactory> lo
 
             var generator = inferenceClient.AsIEmbeddingGenerator();
 
-            return generator.Build(settings);
+            return generator.Build(mLoggerFactory, settings);
         }
 
         catch (Exception ex)

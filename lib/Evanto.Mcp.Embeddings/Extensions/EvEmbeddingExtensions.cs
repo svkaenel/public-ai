@@ -61,18 +61,25 @@ public static class EvEmbeddingExtensions
     ///  
     /// <returns>   An IEmbeddingGenerator with distributed cache and OpenTelemetry support. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public static IEmbeddingGenerator<String, Embedding<Single>> Build(this IEmbeddingGenerator<String, Embedding<Single>> generator, EvChatClientSettings settings)
+    public static IEmbeddingGenerator<String, Embedding<Single>> Build(this IEmbeddingGenerator<String, Embedding<Single>> generator, ILoggerFactory loggerFactory, EvChatClientSettings settings, Boolean telemetryEnabled = true)
     {
         ArgumentNullException.ThrowIfNull(generator, "Embedding generator must be valid!");
         ArgumentNullException.ThrowIfNull(settings, "Embedding settings must be valid!");
 
         // Create and return the embedding generator with distributed cache and OpenTelemetry
-        return new EmbeddingGeneratorBuilder<String, Embedding<Single>>(generator)
+        var builder = new EmbeddingGeneratorBuilder<String, Embedding<Single>>(generator)
+            .UseLogging(loggerFactory)
             .UseDistributedCache(
-            new MemoryDistributedCache(
-                Options.Create(new MemoryDistributedCacheOptions()))
-            )
-        .UseOpenTelemetry(sourceName: $"{settings.ProviderName}-embeddings")
-        .Build();
+                new MemoryDistributedCache(
+                    Options.Create(new MemoryDistributedCacheOptions())
+                )
+            );
+
+        if (telemetryEnabled)
+        {   // Add OpenTelemetry if enabled
+            builder.UseOpenTelemetry(sourceName: $"{settings.ProviderName}-embeddings");
+        }
+
+        return builder.Build();
     }
 }

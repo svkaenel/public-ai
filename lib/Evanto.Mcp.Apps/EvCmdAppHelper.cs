@@ -142,9 +142,9 @@ public class EvCmdAppHelper : EvBaseAppHelper
     {   // Initialize conversation
         await logger.LogOutput("💬 Starting interactive chat with {0} + MCP tools...", rootConfig.SelectedProvider);
         await logger.LogOutput($"# === Interactive Chat with {rootConfig.SelectedProvider} + MCP ===");
-        await logger.LogOutput("Selected provider: **{0}**, selected model: **{1}**.", rootConfig.SelectedProvider, rootConfig.SelectedModel);
+        await logger.LogOutput("Selected provider '{0}', selected model: '{1}'.", rootConfig.SelectedProvider, rootConfig.SelectedModel);
 
-        await logger.LogOutput("Type your questions about business data, or type '**exit**' to quit.");
+        await logger.LogOutput("Type your questions about business data, or type 'exit' to quit.");
 
         // Initialize conversation history with system prompt
         var conversationHistory = await InitializeConversationHistoryAsync(logger);
@@ -181,7 +181,7 @@ public class EvCmdAppHelper : EvBaseAppHelper
                 // Filter <think> nodes if --think parameter is not set
                 var displayText = rootConfig.ShowThinkNodes ? chatResponse.Text : chatResponse.Text.FilterThinkNodes();
 
-                await logger.LogOutput($"🤖 **Assistant ({chatStopwatch.ElapsedMilliseconds}ms):** ");
+                await logger.LogOutput($"🤖 Assistant ({chatStopwatch.ElapsedMilliseconds}ms): ");
                 await logger.LogOutput(displayText);
 
                 Console.WriteLine();

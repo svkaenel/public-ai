@@ -243,13 +243,7 @@ public class EvBaseAppHelper
     /// <param name="settings"> The settings object to apply overrides to. </param>
     ///-------------------------------------------------------------------------------------------------
     private void ApplyEnvironmentVariableOverrides<T>(T settings) where T : EvBaseAppSettings
-    {
-        if (settings.ChatClients == null || settings.ChatClients.Length == 0)
-        {
-            return;
-        }
-
-        // check if chat clients are configured
+    {   // check if chat clients are configured
         var chatClients = settings.ChatClients
             .Where(c => !String.IsNullOrEmpty(c.ProviderName))
             .ToArray();

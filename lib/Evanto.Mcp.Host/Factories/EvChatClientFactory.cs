@@ -8,6 +8,8 @@ using Azure.AI.Inference;
 using Microsoft.Extensions.AI;
 using Azure.AI.OpenAI;
 using Evanto.Mcp.Common.Settings;
+using Evanto.Mcp.Host.Extensions;
+using OllamaSharp;
 
 namespace Evanto.Mcp.Host.Factories;
 
@@ -103,20 +105,21 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
         return settings.ProviderName.ToUpperInvariant() switch
         {
-            "OPENAI"   => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
-            "IONOS"    => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
-            "LMSTUDIO" => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
-            "OLLAMA"   => CreateOllamaChatClient(settings, modelName, telemetryEnabled),
-            "AZURE"    => CreateAzureChatClient(settings, modelName, telemetryEnabled),
-            "AZUREOAI" => CreateAzureOpenAIChatClient(settings, modelName, telemetryEnabled),
-            _          => throw new InvalidOperationException(
+            "OPENAI"      => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
+            "IONOS"       => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
+            "LMSTUDIO"    => CreateOpenAIChatClient(settings, modelName, telemetryEnabled),
+            "OLLAMA"      => CreateOllamaChatClient(settings, modelName, telemetryEnabled),
+            "OLLAMASHARP" => CreateOllamaSharpChatClient(settings, modelName, telemetryEnabled),
+            "AZURE"       => CreateAzureChatClient(settings, modelName, telemetryEnabled),
+            "AZUREOAI"    => CreateAzureOpenAIChatClient(settings, modelName, telemetryEnabled),
+            _             => throw new InvalidOperationException(
                             $"Unknown chat client type: {settings.ProviderName}. " +
                             "Supported types: 'OpenAI', 'Ionos', 'LMStudio', 'Ollama', 'Azure', 'AzureOAI'.")
         };
     }
 
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Creates an Ollama chat client. </summary>
+    /// <summary>   Creates an Ollama chat client (deprecated). </summary>
     ///
     /// <remarks>   SvK, 01.07.2025. </remarks>
     /// <param name="settings">           The provider settings for Ollama. </param>
@@ -134,27 +137,44 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
             ArgumentNullException.ThrowIfNull(modelName);
 
             // Create Ollama client with Microsoft.Extensions.AI.Ollama
-            var ollamaClient = new OllamaChatClient(settings.Endpoint, modelName);
+            var chatClient = new OllamaChatClient(settings.Endpoint, modelName);
 
-            // Wrap with additional features
-            var chatClientBuilder = new ChatClientBuilder(ollamaClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var chatClient = chatClientBuilder
-                .UseFunctionInvocation()
-                .Build();
-
-            return chatClient;
+            return chatClient.Build(mLoggerFactory, settings, telemetryEnabled);
         }
 
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to create Ollama chat client: {ex.Message}", ex);
+        }
+    }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Creates an OllamaSharp chat client. </summary>
+    ///
+    /// <remarks>   SvK, 01.07.2025. </remarks>
+    /// <param name="settings">           The provider settings for Ollama. </param>
+    /// <param name="modelName">          The name of the model to use. </param>
+    /// <param name="telemetryEnabled">   Optional. True for using OpenTelemetry. </param>
+    ///
+    /// <returns>   The configured IChatClient for Ollama. </returns>
+    /// <exception cref="InvalidOperationException">    When creating the Ollama client fails. </exception>
+    ///-------------------------------------------------------------------------------------------------
+    private IChatClient CreateOllamaSharpChatClient(EvChatClientSettings settings, String modelName, Boolean telemetryEnabled = false)
+    {
+        try
+        {   // check requirements
+            ArgumentNullException.ThrowIfNull(settings);
+            ArgumentNullException.ThrowIfNull(modelName);
+
+            // Create Ollama client with OllamaSharp
+            var chatClient = new OllamaApiClient(new Uri(settings.Endpoint), modelName);
+
+            return chatClient.Build(mLoggerFactory, settings, telemetryEnabled);
+        }
+
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to create OllamaSharp chat client: {ex.Message}", ex);
         }
     }
 
@@ -187,23 +207,7 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
             var chatClient = openAiClient.GetChatClient(modelName).AsIChatClient();
 
-            // build chat client with additional features
-            var chatClientBuilder = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var finalChatClient = chatClientBuilder
-                .UseFunctionInvocation(mLoggerFactory, client =>
-                {
-                    client.IncludeDetailedErrors = true; // Include detailed errors in function invocation
-                })
-                .Build();
-
-            return finalChatClient;
+            return chatClient.Build(mLoggerFactory, settings, telemetryEnabled);
         }
 
         catch (Exception ex)
@@ -239,20 +243,7 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
 
             var chatClient = azureOpenAiClient.GetChatClient(modelName).AsIChatClient();
 
-            // build chat client with additional features
-            var chatClientBuilder = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var finalChatClient = chatClientBuilder
-                .UseFunctionInvocation()
-                .Build();
-
-            return finalChatClient;
+            return chatClient.Build(mLoggerFactory, settings, telemetryEnabled);
         }
 
         catch (Exception ex)
@@ -295,20 +286,7 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
             // ❄ In ein IChatClient der Microsoft.Extensions.AI-Welt umwandeln
             var chatClient = inferenceClient.AsIChatClient(modelName);
 
-            // build chat client with additional features
-            var chatClientBuilder = new ChatClientBuilder(chatClient)
-                .UseLogging(mLoggerFactory);
-
-            if (telemetryEnabled)
-            {   // Add OpenTelemetry if enabled
-                chatClientBuilder = chatClientBuilder.UseOpenTelemetry();
-            }
-
-            var finalChatClient = chatClientBuilder
-                .UseFunctionInvocation()
-                .Build();
-
-            return finalChatClient;
+            return chatClient.Build(mLoggerFactory, settings, telemetryEnabled);
         }
 
         catch (Exception ex)
@@ -330,9 +308,9 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     /// <returns>   True if the connection is successful. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<Boolean> TestConnectionAsync(
-        IChatClient       chatClient,
+        IChatClient chatClient,
         CancellationToken cancellationToken = default,
-        Int32             timeoutSeconds    = 60)
+        Int32 timeoutSeconds = 60)
     {
         try
         {   // check requirements
