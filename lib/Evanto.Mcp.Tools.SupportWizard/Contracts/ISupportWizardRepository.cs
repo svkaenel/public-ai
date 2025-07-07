@@ -101,7 +101,7 @@ public interface ISupportWizardRepository
     ///
     /// <returns>   List of all support requests. </returns>
     ///-------------------------------------------------------------------------------------------------
-    Task<IEnumerable<SupportRequest>> GetAllSupportRequestsAsync(int skip = 0, int take = 100);
+    Task<IEnumerable<SupportRequest>> GetAllSupportRequestsAsync(Int32 skip = 0, Int32 take = 100);
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Gets support requests by status asynchronously. </summary>
@@ -156,7 +156,7 @@ public interface ISupportWizardRepository
     ///
     /// <returns>   List of overdue support requests. </returns>
     ///-------------------------------------------------------------------------------------------------
-    Task<IEnumerable<SupportRequest>> GetOverdueRequestsAsync(Dictionary<Priority, int> slaHours);
+    Task<IEnumerable<SupportRequest>> GetOverdueRequestsAsync(Dictionary<Priority, Int32> slaHours);
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Gets a support request by UID asynchronously. </summary>

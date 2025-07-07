@@ -134,7 +134,7 @@ public class EvSupportWizardTool(ISupportWizardRepository supportWizardRepositor
     /// <returns> The updated support request. </returns>
     ///-------------------------------------------------------------------------------------------------
     [McpServerTool, Description("Aktualisiert eine bestehende Supportanfrage")]
-    public async Task<String> UpdateSupportRequest(Guid uid, String customerEmail, String customerName, String channel, String subject, String description, String topic, byte priority, String status, String? resolutionNotes = null)
+    public async Task<String> UpdateSupportRequest(Guid uid, String customerEmail, String customerName, String channel, String subject, String description, String topic, Byte priority, String status, String? resolutionNotes = null)
     {
         var validationError = ValidateNotEmpty(
             customerName,

@@ -443,7 +443,7 @@ public class SupportWizardRepository : ISupportWizardRepository
     ///
     /// <returns>   List of overdue support requests. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public async Task<IEnumerable<SupportRequest>> GetOverdueRequestsAsync(Dictionary<Priority, int> slaHours)
+    public async Task<IEnumerable<SupportRequest>> GetOverdueRequestsAsync(Dictionary<Priority, Int32> slaHours)
     {
         ArgumentNullException.ThrowIfNull(slaHours);
 

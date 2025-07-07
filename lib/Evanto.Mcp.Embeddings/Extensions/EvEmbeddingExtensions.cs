@@ -61,13 +61,13 @@ public static class EvEmbeddingExtensions
     ///  
     /// <returns>   An IEmbeddingGenerator with distributed cache and OpenTelemetry support. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public static IEmbeddingGenerator<String, Embedding<Single>> Build(this IEmbeddingGenerator<string, Embedding<Single>> generator, EvChatClientSettings settings)
+    public static IEmbeddingGenerator<String, Embedding<Single>> Build(this IEmbeddingGenerator<String, Embedding<Single>> generator, EvChatClientSettings settings)
     {
         ArgumentNullException.ThrowIfNull(generator, "Embedding generator must be valid!");
         ArgumentNullException.ThrowIfNull(settings, "Embedding settings must be valid!");
 
         // Create and return the embedding generator with distributed cache and OpenTelemetry
-        return new EmbeddingGeneratorBuilder<string, Embedding<Single>>(generator)
+        return new EmbeddingGeneratorBuilder<String, Embedding<Single>>(generator)
             .UseDistributedCache(
             new MemoryDistributedCache(
                 Options.Create(new MemoryDistributedCacheOptions()))
