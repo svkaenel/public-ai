@@ -30,7 +30,10 @@ public class EvBaseAppHelper
         // Bind the configuration to RootConfiguration
         var settings = new T();
         configuration.Bind(settings);
-        
+
+        // Apply environment variable overrides for API keys
+        ApplyEnvironmentVariableOverrides(settings);
+
         if (settings is EvMcpSrvAppSettings srvSettings)
         {   // Manually bind nested sections for proper object creation
             var qdrantSection = configuration.GetSection("Qdrant");
@@ -47,7 +50,7 @@ public class EvBaseAppHelper
                 embeddingSection.Bind(srvSettings.Embeddings);
             }
         }
-        
+
         return settings;
     }
 
@@ -64,8 +67,8 @@ public class EvBaseAppHelper
         var rootConfig = LoadConfiguration<T>();
 
         // Parse command line parameters and adjust configuration
-        rootConfig.ShowThinkNodes  = args.Contains("--think");
-        rootConfig.RunTests        = args.Contains("--test") || true;
+        rootConfig.ShowThinkNodes = args.Contains("--think");
+        rootConfig.RunTests = args.Contains("--test") || true;
         rootConfig.EnableTelemetry = args.Contains("--telemetry");
 
         rootConfig.SetSelectedProvider(GetCommandLineParameter(args, "--provider"));
@@ -150,7 +153,7 @@ public class EvBaseAppHelper
             }
 
             // Add debug logging for VS Code or K8S / Docker environments
-            builder.AddDebug(); 
+            builder.AddDebug();
 
             if (rootConfig.Telemetry.Enabled && rootConfig.Telemetry.EnableLogging)
             {   // Add OpenTelemetry logging
@@ -184,7 +187,7 @@ public class EvBaseAppHelper
 
         return null;
     }
-    
+
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Configures OpenTelemetry logging. </summary>
     /// 
@@ -229,4 +232,59 @@ public class EvBaseAppHelper
         });
     }
 
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Applies environment variable overrides for API keys in ChatClients. </summary>
+    ///
+    /// <remarks>   SvK, 07.01.2025. </remarks>
+    ///
+    /// <param name="settings"> The settings object to apply overrides to. </param>
+    ///-------------------------------------------------------------------------------------------------
+    private void ApplyEnvironmentVariableOverrides<T>(T settings) where T : EvBaseAppSettings
+    {
+        if (settings.ChatClients == null || settings.ChatClients.Length == 0)
+        {
+            return;
+        }
+
+        // check if chat clients are configured
+        var chatClients = settings.ChatClients
+            .Where(c => !String.IsNullOrEmpty(c.ProviderName))
+            .ToArray();
+
+        foreach (var chatClient in chatClients)
+        {
+            ApplyForProvider(chatClient);
+        }
+
+        // also apply to embedding providers if they are configured
+        var embeddingProviders = settings.EmbeddingProviders
+            .Where(c => !String.IsNullOrEmpty(c.ProviderName))
+            .ToArray();
+
+        foreach (var embeddingProvider in embeddingProviders)
+        {
+            ApplyForProvider(embeddingProvider);
+        }
+    }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Applies environment variable overrides for a specific chat client provider. </summary>
+    ///
+    /// <remarks>   SvK, 07.07.2025. </remarks>
+    /// 
+    /// <param name="chatClient"> The chat client settings to apply overrides to. </param>
+    ///-------------------------------------------------------------------------------------------------
+    private void ApplyForProvider(EvChatClientSettings chatClient)
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(chatClient);
+
+        // Generate environment variable name: {PROVIDER_NAME}_API_KEY
+        var envVarName  = $"{chatClient.ProviderName.ToUpperInvariant()}_API_KEY";
+        var envVarValue = Environment.GetEnvironmentVariable(envVarName);
+
+        if (!String.IsNullOrEmpty(envVarValue))
+        {
+            chatClient.ApiKey = envVarValue;
+        }
+    }
 }

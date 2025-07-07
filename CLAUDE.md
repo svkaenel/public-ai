@@ -68,7 +68,7 @@ This approach provides:
    - **Evanto.Mcp.Host** - Core MCP hosting logic, factories, and testing framework
    - **Evanto.Mcp.Common** - Shared configuration, settings, and common utilities
    - **Evanto.Mcp.Apps** - Application helper services and shared app functionality
-   - **Evanto.Mcp.Embeddings** - Text embedding services and vector operations
+   - **Evanto.Mcp.Embeddings** - Multi-provider text embedding services using Microsoft.Extensions.AI
 3. **External Tool Integration Libraries** (lib/) - Wrappers for external dependencies:
    - **Evanto.Mcp.Pdfs** - PDF text extraction services using iText7
    - **Evanto.Mcp.QdrantDB** - Unified Qdrant vector database repository and document management
@@ -117,9 +117,39 @@ This approach provides:
 The configuration uses a multi-provider approach where each provider has:
 - `ProviderName`: Identifier for the AI service
 - `Endpoint`: API endpoint URL
-- `ApiKey`: Authentication credentials
+- `ApiKey`: Authentication credentials (can be overridden by environment variables)
 - `DefaultModel`: Default model to use
 - `AvailableModels`: List of supported models
+
+### Environment Variable Overrides for API Keys
+API keys in the ChatClients configuration can be overridden using environment variables for better security:
+
+**Supported Environment Variables:**
+- `OPENAI_API_KEY`: Overrides API key for OpenAI provider
+- `IONOS_API_KEY`: Overrides API key for Ionos provider
+- `AZURE_API_KEY`: Overrides API key for Azure provider
+- `AZUREOAI_API_KEY`: Overrides API key for AzureOAI provider
+- `LMSTUDIO_API_KEY`: Overrides API key for LMStudio provider
+- `OLLAMA_API_KEY`: Overrides API key for Ollama provider
+
+**Usage Example:**
+```bash
+# Set environment variables
+export OPENAI_API_KEY="***REMOVED***your-openai-key"
+export IONOS_API_KEY="your-ionos-token"
+
+# Run the application
+dotnet run --project app/cmd-mcp-host
+
+# Or run with environment variables inline
+OPENAI_API_KEY="***REMOVED***your-key" dotnet run --project app/cmd-mcp-host
+```
+
+**Security Benefits:**
+- API keys can be removed from appsettings.json files
+- Environment variables are not committed to version control
+- Different keys can be used for different deployment environments
+- Follows industry best practices for secrets management
 
 ### OpenTelemetry Configuration
 The `Telemetry` section in appsettings.json configures observability:
@@ -200,12 +230,12 @@ For PDF processing and vectorization:
 #### Vector Database Dependencies
 - `Qdrant.Client`: Official Qdrant vector database client for .NET
 - `Evanto.Mcp.QdrantDB`: Unified repository layer for Qdrant operations
-- `Evanto.Mcp.Embeddings`: Text embedding services and vector processing
+- `Evanto.Mcp.Embeddings`: Multi-provider text embedding services using Microsoft.Extensions.AI
 
 ### SupportDocs Specific Dependencies
-- **Evanto.Mcp.Embeddings**: Text embedding service abstractions
+- **Evanto.Mcp.Embeddings**: Multi-provider text embedding services using Microsoft.Extensions.AI
 - **Evanto.Mcp.QdrantDB**: Vector database repository for document storage and search
-- **Embedding Providers**: Ollama, OpenAI, or other text embedding services
+- **Embedding Providers**: Multi-provider support (OpenAI, Azure, Ollama, LMStudio, Ionos) via Microsoft.Extensions.AI
 - **Vector Database**: Qdrant for storing and searching document embeddings via unified repository
 - **Text Processing**: Configurable chunking and overlap for document processing
 
@@ -264,7 +294,7 @@ The SupportDocs system provides intelligent document management and search:
 - **Vector Storage**: Store embeddings in Qdrant vector database
 - **Semantic Search**: Find relevant documents based on semantic similarity
 - **Multi-Format Support**: Handle various document formats and content types
-- **Embedding Providers**: Support multiple embedding services (Ollama, OpenAI, etc.)
+- **Multi-Provider Support**: Unified interface for OpenAI, Azure, Ollama, LMStudio, and Ionos embedding services
 
 #### Architecture
 - **Embedding Service**: Text-to-vector conversion using configurable models (via Evanto.Mcp.Embeddings)
@@ -274,7 +304,7 @@ The SupportDocs system provides intelligent document management and search:
 
 #### External Dependencies
 - **Qdrant Database**: High-performance vector similarity search engine
-- **Ollama/OpenAI**: Text embedding model providers
+- **Multiple Embedding Providers**: OpenAI, Azure, Ollama, LMStudio, and Ionos via Microsoft.Extensions.AI
 
 ### Evanto.Mcp.Pdfs Library
 A PDF processing abstraction library that wraps iText7 for text extraction:
@@ -295,6 +325,67 @@ A PDF processing abstraction library that wraps iText7 for text extraction:
 - **iText7.Core**: Commercial-grade PDF processing library
 - Provides enterprise-level PDF text extraction capabilities
 - Handles complex PDF structures, fonts, and encodings
+
+### Evanto.Mcp.Embeddings Library (V-0.2.0 Refactored)
+A comprehensive multi-provider text embedding library using Microsoft.Extensions.AI abstractions:
+
+#### Features
+- **Multi-Provider Support**: Unified interface for OpenAI, Azure, Ollama, LMStudio, and Ionos embedding services
+- **Microsoft.Extensions.AI Integration**: Built on standardized AI abstractions for consistency and testability
+- **Automatic Performance Enhancements**: Built-in caching, rate limiting, and OpenTelemetry integration
+- **Configuration-Driven**: Provider selection and settings managed through configuration files
+- **Connection Testing**: Built-in validation of provider connectivity and model availability
+- **Memory Efficient**: Uses `ReadOnlyMemory<Single>` for optimal performance
+- **Batch Processing**: Efficient handling of multiple text inputs with rate limiting
+
+#### Architecture
+- **Factory Pattern**: `EvEmbeddingGeneratorFactory` creates provider-specific clients
+- **Service Abstraction**: `IEvEmbeddingService` provides consistent API regardless of provider
+- **Dependency Injection**: Full DI support with automatic registration extensions
+- **Settings Integration**: Deep integration with `EvEmbeddingSettings` configuration
+
+#### Key Components
+- **Contracts/IEvEmbeddingService.cs**: Main service interface for embedding operations
+- **Services/EvEmbeddingService.cs**: Core service implementation with error handling
+- **Factories/EvEmbeddingGeneratorFactory.cs**: Multi-provider factory with auto-enhancement
+- **Extensions/EvEmbeddingExtensions.cs**: Dependency injection registration methods
+
+#### Supported Providers
+- **OpenAI**: Standard OpenAI embedding API
+- **Azure OpenAI**: Azure-hosted OpenAI services
+- **Azure AI Inference**: Azure AI inference endpoints
+- **Ollama**: Local AI model hosting (both Microsoft.Extensions.AI and OllamaSharp)
+- **LMStudio**: Local OpenAI-compatible server
+- **Ionos**: OpenAI-compatible cloud service
+
+#### External Dependencies
+- **Microsoft.Extensions.AI**: Core AI abstractions and provider integrations
+- **Azure.AI.OpenAI**: Azure OpenAI client library
+- **Azure.AI.Inference**: Azure AI inference client
+- **OllamaSharp**: Direct Ollama integration for legacy compatibility
+- **Microsoft.Extensions.Caching.Memory**: Performance caching support
+
+#### Configuration Structure
+```json
+{
+  "Embeddings": {
+    "ProviderName": "OpenAI",
+    "DefaultModel": "text-embedding-ada-002",
+    "Endpoint": "https://api.openai.com/v1",
+    "ApiKey": "your-api-key",
+    "ChunkSize": 1000,
+    "ChunkOverlap": 200,
+    "EmbeddingDimensions": 1536
+  }
+}
+```
+
+#### Migration Benefits
+- **Provider Flexibility**: Easy switching between embedding providers without code changes
+- **Unified Interface**: Single API for all embedding operations regardless of provider
+- **Performance Optimization**: Built-in caching and telemetry reduce costs and improve monitoring
+- **Reduced Dependencies**: Centralized embedding logic eliminates duplicate provider integrations
+- **Better Testing**: Standardized interfaces improve unit testing and mocking capabilities
 
 ### Evanto.Mcp.QdrantDB Library
 A unified repository library for Qdrant vector database operations:
@@ -335,7 +426,7 @@ A command-line application for batch processing PDF documents into vector embedd
 #### Features
 - **PDF Text Extraction**: Extract text content from PDF files using iText7
 - **Text Chunking**: Split documents into configurable chunks with overlap
-- **Vector Embeddings**: Convert text chunks to embeddings using Ollama or other providers
+- **Vector Embeddings**: Convert text chunks to embeddings using multi-provider support (OpenAI, Azure, Ollama, etc.)
 - **Vector Storage**: Store embeddings in Qdrant vector database
 - **File Tracking**: JSON-based tracking to avoid reprocessing files
 - **Batch Processing**: Process multiple PDFs in a single run
@@ -348,11 +439,11 @@ A command-line application for batch processing PDF documents into vector embedd
 
 #### Dependencies
 - **Evanto.Mcp.Pdfs**: PDF text extraction services (wraps iText7)
-- **Evanto.Mcp.Embeddings**: Text embedding service abstractions  
+- **Evanto.Mcp.Embeddings**: Multi-provider text embedding services using Microsoft.Extensions.AI  
 - **Evanto.Mcp.QdrantDB**: Vector database repository and document management
-- **OllamaSharp**: Integration with Ollama embedding service
+- **Multiple Embedding Providers**: OpenAI, Azure, Ollama, LMStudio, and Ionos via Microsoft.Extensions.AI
 
 #### External Tool Integration
 - **iText7 (via Evanto.Mcp.Pdfs)**: Enterprise PDF text extraction
 - **Qdrant (via Evanto.Mcp.QdrantDB)**: High-performance vector database
-- **Ollama**: Local AI model hosting for embeddings
+- **Multiple Embedding Providers**: OpenAI, Azure, Ollama, LMStudio, and Ionos for text embeddings
