@@ -19,6 +19,13 @@ services:
       - DOTNET_RUNNING_IN_CONTAINER=true
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
+      # API Keys from .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - IONOS_API_KEY=${IONOS_API_KEY}
+      - AZURE_API_KEY=${AZURE_API_KEY}
+      - AZUREOAI_API_KEY=${AZUREOAI_API_KEY}
+      - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY}
     volumes:
       - "${DB_PATH:-./run/sse/db}:/app/db:rw"
       - "${SSE_CONFIG_PATH:-./run/sse/appsettings.json}:/app/appsettings.json:ro"
@@ -48,6 +55,13 @@ services:
       - DOTNET_RUNNING_IN_CONTAINER=true
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
+      # API Keys from .env file
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - IONOS_API_KEY=${IONOS_API_KEY}
+      - AZURE_API_KEY=${AZURE_API_KEY}
+      - AZUREOAI_API_KEY=${AZUREOAI_API_KEY}
+      - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY}
     volumes:
       - "${DB_PATH:-./run/stdio/db}:/app/db:rw"
       - "${STDIO_CONFIG_PATH:-./run/stdio/appsettings.json}:/app/appsettings.json:ro"

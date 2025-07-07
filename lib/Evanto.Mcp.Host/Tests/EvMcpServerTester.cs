@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Text.Json;
 using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Host.Models;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
 
@@ -383,7 +382,7 @@ public class EvMcpServerTester(ILogger logger)
     public static async Task TestAllMcpServersAsync(
         ILogger                 logger,
         EvHostAppSettings       rootConfig,
-        IList<EvMcpClientInfo>    mcpClients)
+        IList<EvMcpClientInfo>  mcpClients)
     {
         try
         {

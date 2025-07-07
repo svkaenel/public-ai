@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- https://www.milanjovanovic.tech/blog/central-package-management-in-net-simplify-nuget-dependencies -->
+    <PackageVersion Include="DotNetEnv" Version="3.1.1" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
@@ -50,8 +51,7 @@
     <PackageVersion Include="Qdrant.Client" Version="1.14.0" />
     <PackageVersion Include="itext7" Version="9.2.0" />
     <!-- SQLite packages for Alpine Deployment -->
-    <PackageVersion Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.11" /> 
+    <PackageVersion Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.11" />
     <PackageVersion Include="SQLitePCLRaw.core" Version="2.1.11" />
-
   </ItemGroup>
 </Project>

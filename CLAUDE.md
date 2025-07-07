@@ -132,24 +132,63 @@ API keys in the ChatClients configuration can be overridden using environment va
 - `LMSTUDIO_API_KEY`: Overrides API key for LMStudio provider
 - `OLLAMA_API_KEY`: Overrides API key for Ollama provider
 
-**Usage Example:**
+**Usage Options:**
+
+1. **Environment Variables (System-wide):**
 ```bash
-# Set environment variables
+# Set environment variables in shell
 export OPENAI_API_KEY="***REMOVED***your-openai-key"
 export IONOS_API_KEY="your-ionos-token"
 
 # Run the application
 dotnet run --project app/cmd-mcp-host
+```
 
-# Or run with environment variables inline
+2. **Inline Environment Variables:**
+```bash
+# Run with environment variables inline
 OPENAI_API_KEY="***REMOVED***your-key" dotnet run --project app/cmd-mcp-host
 ```
 
+3. **.env File (Recommended):**
+```bash
+# Copy example file and customize
+cp .env.example .env
+
+# Edit .env file with your API keys
+nano .env
+
+# Run application (automatically loads .env)
+dotnet run --project app/cmd-mcp-host
+```
+
+4. **Docker Compose with .env:**
+```bash
+# Copy and customize .env file
+cp .env.example .env
+
+# Run with Docker Compose (automatically uses .env)
+docker-compose up -d
+```
+
 **Security Benefits:**
-- API keys can be removed from appsettings.json files
-- Environment variables are not committed to version control
-- Different keys can be used for different deployment environments
-- Follows industry best practices for secrets management
+- **No API keys in source code**: API keys can be removed from appsettings.json files
+- **Git safety**: .env files are automatically ignored by git (.gitignore)
+- **Environment separation**: Different keys for development, staging, and production
+- **Industry standard**: Follows 12-factor app methodology for configuration
+- **Docker integration**: Seamless integration with Docker Compose environments
+
+**File Priority (highest to lowest):**
+1. **Command line environment variables** (highest priority)
+2. **System environment variables**
+3. **.env file variables** 
+4. **appsettings.json values** (lowest priority)
+
+**Important Notes:**
+- The .env file is automatically searched for in the project root directory
+- .env files are automatically ignored by git (already in .gitignore)
+- Use .env.example as a template for creating your .env file
+- All applications and Docker containers automatically support .env file loading
 
 ### OpenTelemetry Configuration
 The `Telemetry` section in appsettings.json configures observability:

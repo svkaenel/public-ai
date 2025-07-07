@@ -1,6 +1,7 @@
 ﻿using Evanto.Mcp.Common.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using DotNetEnv;
 
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
@@ -19,7 +20,9 @@ public class EvBaseAppHelper
     /// <returns>   The RootConfiguration instance with the loaded settings. </returns>
     ///-------------------------------------------------------------------------------------------------
     public T LoadConfiguration<T>() where T : EvBaseAppSettings, new()
-    {
+    {   // Load .env file from root directory if it exists
+        LoadEnvironmentFile();
+
         var configurationBuilder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
@@ -67,8 +70,8 @@ public class EvBaseAppHelper
         var rootConfig = LoadConfiguration<T>();
 
         // Parse command line parameters and adjust configuration
-        rootConfig.ShowThinkNodes = args.Contains("--think");
-        rootConfig.RunTests = args.Contains("--test") || true;
+        rootConfig.ShowThinkNodes  = args.Contains("--think");
+        rootConfig.RunTests        = args.Contains("--test") || true;
         rootConfig.EnableTelemetry = args.Contains("--telemetry");
 
         rootConfig.SetSelectedProvider(GetCommandLineParameter(args, "--provider"));
@@ -227,7 +230,7 @@ public class EvBaseAppHelper
             }
 
             // Important options to improve data quality
-            openTelemetryLoggerOptions.IncludeScopes = true;
+            openTelemetryLoggerOptions.IncludeScopes           = true;
             openTelemetryLoggerOptions.IncludeFormattedMessage = true;
         });
     }
@@ -287,4 +290,63 @@ public class EvBaseAppHelper
             chatClient.ApiKey = envVarValue;
         }
     }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Loads environment variables from .env file in the root directory. </summary>
+    ///
+    /// <remarks>   SvK, 07.01.2025. </remarks>
+    ///-------------------------------------------------------------------------------------------------
+    private void LoadEnvironmentFile()
+    {
+        try
+        {   // Look for .env file in root directory (go up from current directory)
+            var currentDirectory = Directory.GetCurrentDirectory();
+            var rootDirectory = FindRootDirectory(currentDirectory);
+            
+            if (rootDirectory != null)
+            {
+                var envFilePath = Path.Combine(rootDirectory, ".env");
+                if (File.Exists(envFilePath))
+                {
+                    Env.Load(envFilePath);
+                }
+            }
+        }
+
+        catch (Exception)
+        {
+            // Silently ignore any errors loading .env file
+            // This ensures the application still works if .env file has issues
+        }
+    }
+
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>   Finds the root directory by looking for specific marker files. </summary>
+    ///
+    /// <remarks>   SvK, 07.01.2025. </remarks>
+    ///
+    /// <param name="startDirectory"> The directory to start searching from. </param>
+    ///
+    /// <returns>   The root directory path or null if not found. </returns>
+    ///-------------------------------------------------------------------------------------------------
+    private String? FindRootDirectory(String startDirectory)
+    {
+        var directory = new DirectoryInfo(startDirectory);
+
+        while (directory != null)
+        {
+            // Look for marker files that indicate the root directory
+            if (File.Exists(Path.Combine(directory.FullName, "public-ai.sln")) ||
+                File.Exists(Path.Combine(directory.FullName, "docker-compose.yml")) ||
+                File.Exists(Path.Combine(directory.FullName, "Directory.Packages.props")))
+            {
+                return directory.FullName;
+            }
+
+            directory = directory.Parent;
+        }
+
+        return null;
+    }
+
 }
