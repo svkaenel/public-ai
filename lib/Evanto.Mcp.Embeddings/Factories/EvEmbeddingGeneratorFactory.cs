@@ -85,16 +85,21 @@ public class EvEmbeddingGeneratorFactory(ILoggerFactory loggerFactory)
         ArgumentNullException.ThrowIfNull(mLogger);
         ArgumentNullException.ThrowIfNull(modelName);
 
-        if (!String.IsNullOrEmpty(modelName) && (settings.AvailableModels.Length > 0))
-        {   // Validate if the model is available
-            var isAvailable = Array.Exists(settings.AvailableModels, m => m == modelName);
-            if (!isAvailable)
-            {
-                throw new InvalidOperationException(
-                    $"Model '{modelName}' not found in provider configuration for provider {settings.ProviderName}'. " +
-                    $"Available models: {String.Join(", ", settings.AvailableModels ?? Enumerable.Empty<String>())}");
-            }
+        if (String.IsNullOrEmpty(settings.ApiKey) || settings.ApiKey.StartsWith("{{"))
+        {
+            throw new ArgumentNullException(nameof(settings.ApiKey), $"API key must be provided in the settings or is a non replaced variable ({settings.ApiKey}).");
         }
+
+        if (!String.IsNullOrEmpty(modelName) && (settings.AvailableModels.Length > 0))
+            {   // Validate if the model is available
+                var isAvailable = Array.Exists(settings.AvailableModels, m => m == modelName);
+                if (!isAvailable)
+                {
+                    throw new InvalidOperationException(
+                        $"Model '{modelName}' not found in provider configuration for provider {settings.ProviderName}'. " +
+                        $"Available models: {String.Join(", ", settings.AvailableModels ?? Enumerable.Empty<String>())}");
+                }
+            }
 
         mLogger.LogInformation($"🦙 Configuring {settings.ProviderName} provider:");
         mLogger.LogInformation("   Provider: {ProviderName}", settings.ProviderName);

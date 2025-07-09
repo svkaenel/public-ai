@@ -18,8 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".doc", ".doc", "{A8DCE0F2-2
 		CLAUDE.md = CLAUDE.md
 		CodingRules.md = CodingRules.md
 		Directory.Packages.props = Directory.Packages.props
-		docker-compose.yml = docker-compose.yml
 		Deploy.md = Deploy.md
+		docker-compose.yaml = docker-compose.yaml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Tools.SupportWizard", "lib\Evanto.Mcp.Tools.SupportWizard\Evanto.Mcp.Tools.SupportWizard.csproj", "{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}"

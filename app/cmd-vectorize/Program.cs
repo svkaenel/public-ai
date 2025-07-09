@@ -29,8 +29,7 @@ public class Program
     /// <returns>   A Task representing the asynchronous operation. </returns>
     ///-------------------------------------------------------------------------------------------------
     public static async Task Main(String[] args)
-    {
-        // 1. Set up configuration and logging
+    {   // 1. Set up configuration and logging
         var appHelper               = EvCmdAppHelper.Create;
         var settings                = appHelper.LoadConfiguration<EvVectorizeAppSettings>();
         var (logger, loggerFactory) = appHelper.GetLogger(settings);

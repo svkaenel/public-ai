@@ -14,7 +14,7 @@ public class EvMcpToolJsonScheme
     public String                                           Type            { get; set; } = "object";
 
     [JsonPropertyName("properties")]
-    public Dictionary<string, EvJsonPropertyDefinition>?    Properties      { get; set; }
+    public Dictionary<String, EvJsonPropertyDefinition>?    Properties      { get; set; }
 
     [JsonPropertyName("required")]
     public List<String>?                                    Required        { get; set; }

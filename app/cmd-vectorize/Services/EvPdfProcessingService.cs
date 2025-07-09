@@ -111,7 +111,7 @@ public class EvPdfProcessingService(
     ///-------------------------------------------------------------------------------------------------
     public async Task<EvProcessingResult> ProcessSpecificPdfAsync(String filePath)
     {   // process specific PDF file
-        var result = new EvProcessingResult();
+        var result   = new EvProcessingResult();
         var fileName = Path.GetFileName(filePath);
 
         try
@@ -152,7 +152,8 @@ public class EvPdfProcessingService(
             if (chunks == null || !chunks.Any()) // added null check for safety
             {   // no chunks created
                 mLogger.LogWarning("No text chunks created for PDF: {FileName}", fileName);
-                result.ErrorCount = 1;
+
+                result.ErrorCount       = 1;
                 result.Errors[fileName] = "No text chunks created";
 
                 return result;

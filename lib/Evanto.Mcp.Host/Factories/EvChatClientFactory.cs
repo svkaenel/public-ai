@@ -84,6 +84,11 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
         ArgumentNullException.ThrowIfNull(mLogger);
         ArgumentNullException.ThrowIfNull(modelName);
 
+        if (String.IsNullOrEmpty(settings.ApiKey) || settings.ApiKey.StartsWith("{{"))
+        {
+            throw new ArgumentNullException(nameof(settings.ApiKey), $"API key must be provided in the settings or is a non replaced variable ({settings.ApiKey}).");
+        }
+
         if (!String.IsNullOrEmpty(modelName) && (settings.AvailableModels.Length > 0))
         {   // Validate if the model is available
             var isAvailable = Array.Exists(settings.AvailableModels, m => m == modelName);

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Evanto.Mcp.Host.Extensions;
 
-public static class EvEmbeddingExtensions
+public static class EvHostExtensions
 {
     ///-------------------------------------------------------------------------------------------------
     /// <summary>   Builds an embedding generator with distributed cache and OpenTelemetry support. </summary>
