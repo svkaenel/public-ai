@@ -1,16 +1,13 @@
-using System;
-using Evanto.Mcp.Common.Settings;
 using Evanto.Mcp.Tools.SupportWizard.Context;
 using Evanto.Mcp.Tools.SupportWizard.Contracts;
 using Evanto.Mcp.Tools.SupportWizard.Repository;
 using Evanto.Mcp.Tools.SupportWizard.Tools;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using SQLitePCL;
+// using SQLitePCL;
 
 namespace Evanto.Mcp.Tools.SupportWizard.Extensions;
 
@@ -115,7 +112,7 @@ public static class EvSupportWizardExtensions
 
         catch (Exception ex)
         {
-            Console.WriteLine("Migrating database failed: {0}!", ex.Message);
+            Console.Error.WriteLine("Migrating database failed: {0}!", ex.Message);
             return false;
         }
     }
@@ -153,9 +150,6 @@ public static class EvSupportWizardExtensions
         var connectDB = builder.Configuration.GetConnectionString("SupportWizardDB");
 
         ArgumentException.ThrowIfNullOrEmpty("Support wizard connection string must be valid!");
-
-        // Initialize SQLite with system provider for Alpine Linux containers
-        SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_sqlite3());
 
         // add support wizard database with minimal logging
         builder.Services.AddDbContext<SupportWizardDbContext>(options =>

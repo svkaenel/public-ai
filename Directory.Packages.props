@@ -50,8 +50,5 @@
     <PackageVersion Include="OllamaSharp" Version="5.1.19" />
     <PackageVersion Include="Qdrant.Client" Version="1.14.0" />
     <PackageVersion Include="itext7" Version="9.2.0" />
-    <!-- SQLite packages for Alpine Deployment -->
-    <PackageVersion Include="SQLitePCLRaw.provider.sqlite3" Version="2.1.11" />
-    <PackageVersion Include="SQLitePCLRaw.core" Version="2.1.11" />
   </ItemGroup>
 </Project>

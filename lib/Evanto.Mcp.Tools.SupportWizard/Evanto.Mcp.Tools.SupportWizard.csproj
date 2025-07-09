@@ -17,9 +17,6 @@
     <PackageReference Include="ModelContextProtocol" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" /> 
-    <!-- Use system SQLite library for Alpine Linux compatibility -->
-    <PackageReference Include="SQLitePCLRaw.provider.sqlite3" /> 
-    <PackageReference Include="SQLitePCLRaw.core" />
 
   </ItemGroup>
 

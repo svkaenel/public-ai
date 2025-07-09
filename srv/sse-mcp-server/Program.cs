@@ -47,8 +47,6 @@ public class Program
             .WithSupportWizardMcpTools()
             .WithSupportDocMcpTools();
 
-        await logger.LogOutput($"All services added...");
-
         var app = builder.Build();
 
         await logger.LogOutput($"DI setup finished...");
