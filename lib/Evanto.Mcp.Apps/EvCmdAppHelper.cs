@@ -27,8 +27,13 @@ public class EvCmdAppHelper : EvBaseAppHelper
     public async Task<Boolean> TestChatClientConnectionAsync(ILogger logger, IChatClient chatClient, IList<McpClientTool> tools, String providerName = "Chat Client")
     {
         try
-        {   // Test connection with a simple message with timeout
-            await logger.LogOutput("🧪 Testing {ProviderName} connection...", providerName);
+        {   // check requirements
+            ArgumentNullException.ThrowIfNull(chatClient, nameof(chatClient));
+            ArgumentNullException.ThrowIfNull(tools, nameof(tools));
+            ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+
+            // Test connection with a simple message with timeout
+            logger.LogInformation("🧪 Testing {ProviderName} connection...", providerName);
 
             var testMessages = new[]
             {
@@ -37,14 +42,14 @@ public class EvCmdAppHelper : EvBaseAppHelper
             };
 
             // Test without tools first with timeout
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var stopwatch = Stopwatch.StartNew();
-            var testResponse = await chatClient.GetResponseAsync(testMessages, cancellationToken: cts.Token);
+            using var cts      = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var   stopwatch    = Stopwatch.StartNew();
+            var   testResponse = await chatClient.GetResponseAsync(testMessages, cancellationToken: cts.Token);
 
             stopwatch.Stop();
 
-            await logger.LogOutput("✅ {ProviderName} connection successful! Test response: {Response}", providerName, testResponse);
-            await logger.LogOutput("⏱️ LLM call duration: {Duration}ms", stopwatch.ElapsedMilliseconds);
+            logger.LogInformation("✅ {ProviderName} connection successful! Test response: {Response}", providerName, testResponse);
+            logger.LogInformation("⏱️ LLM call duration: {Duration}ms", stopwatch.ElapsedMilliseconds);
 
             // Define the conversation with tools
             var messages = new[]
@@ -57,7 +62,7 @@ public class EvCmdAppHelper : EvBaseAppHelper
             var chatOptions = new ChatOptions { Tools = [.. tools] };
 
             // Invoke the chat with MCP tools with longer timeout
-            await logger.LogOutput("🧪 Testing {ProviderName} with MCP tools...", providerName);
+            logger.LogInformation("🧪 Testing {ProviderName} with MCP tools...", providerName);
 
             using var mainCts = new CancellationTokenSource(TimeSpan.FromMinutes(3));
             var toolStopwatch = Stopwatch.StartNew();
@@ -71,17 +76,14 @@ public class EvCmdAppHelper : EvBaseAppHelper
             toolStopwatch.Stop();
 
             // Test initial conversation
-            await logger.LogOutput("🤖 Assistant response ({Duration} ms):", toolStopwatch.ElapsedMilliseconds);
-
-            Console.WriteLine(response);
+            logger.LogInformation("🤖 Assistant response ({Duration} ms):", toolStopwatch.ElapsedMilliseconds);
 
             return true;
         }
 
         catch (Exception ex)
         {
-            logger.LogError(ex, "❌ Error during {ProviderName} connection test", providerName);
-            Console.WriteLine($"Error: {ex.Message}");
+            logger.LogWarning(ex, "❌ Error during {ProviderName} connection test.", providerName);
             return false;
         }
     }
@@ -103,7 +105,7 @@ public class EvCmdAppHelper : EvBaseAppHelper
         {   // Try to load system prompt from file
             systemPrompt = await File.ReadAllTextAsync("system-prompt.txt");
 
-            await logger.LogOutput("✅ System prompt loaded from system-prompt.txt");
+            logger.LogInformation("✅ System prompt loaded from system-prompt.txt");
         }
 
         catch (Exception ex)
@@ -140,11 +142,11 @@ public class EvCmdAppHelper : EvBaseAppHelper
         IList<McpClientTool> allTools,
         EvHostAppSettings    rootConfig)
     {   // Initialize conversation
-        await logger.LogOutput("💬 Starting interactive chat with {0} + MCP tools...", rootConfig.SelectedProvider);
-        await logger.LogOutput($"# === Interactive Chat with {rootConfig.SelectedProvider} + MCP ===");
-        await logger.LogOutput("Selected provider '{0}', selected model: '{1}'.", rootConfig.SelectedProvider, rootConfig.SelectedModel);
+        logger.LogInformation("Starting interactive chat with + MCP tools...");
+        logger.LogInformation("Selected provider '{provider}', selected model: '{model}'.", rootConfig.SelectedProvider, rootConfig.SelectedModel);
 
-        await logger.LogOutput("Type your questions about business data, or type 'exit' to quit.");
+        Console.WriteLine($"=== Interactive Chat with {rootConfig.SelectedProvider} and model {rootConfig.SelectedModel} + MCP ===");
+        Console.WriteLine("💬 Type your questions about 'SupportWizard' data, or type 'exit' to quit.");
 
         // Initialize conversation history with system prompt
         var conversationHistory = await InitializeConversationHistoryAsync(logger);
@@ -181,8 +183,8 @@ public class EvCmdAppHelper : EvBaseAppHelper
                 // Filter <think> nodes if --think parameter is not set
                 var displayText = rootConfig.ShowThinkNodes ? chatResponse.Text : chatResponse.Text.FilterThinkNodes();
 
-                await logger.LogOutput($"🤖 Assistant ({chatStopwatch.ElapsedMilliseconds}ms): ");
-                await logger.LogOutput(displayText);
+                Console.WriteLine($"🤖 Assistant ({chatStopwatch.ElapsedMilliseconds}ms): ");
+                Console.WriteLine(displayText);
 
                 Console.WriteLine();
 
@@ -193,7 +195,7 @@ public class EvCmdAppHelper : EvBaseAppHelper
             catch (Exception chatEx)
             {
                 logger.LogError(chatEx, "Error during chat interaction");
-                Console.WriteLine($"\n❌ Error: {chatEx.Message}\n");
+                Console.Error.WriteLine($"\n❌ Error in chat loop with assistant: {chatEx.Message}\n");
             }
         }
     }
@@ -238,7 +240,7 @@ public class EvCmdAppHelper : EvBaseAppHelper
 
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Fehler beim Laden der Konfiguration: {ex.Message}");
+            Console.Error.WriteLine($"❌ Fehler beim Laden der Konfiguration: {ex.Message}");
         }
     }
 

@@ -87,7 +87,7 @@ public class Program
 
                     if (!connectionTest)
                     {
-                        logger.LogWarning("⚠️ Chat client connection test failed, but continuing anyway...");
+                        Console.Error.WriteLine($"⚠️ Fehler beim Testen der ChatClient-Verbindung.");
                     }
                 }
 
@@ -98,20 +98,22 @@ public class Program
             catch (Exception chatClientEx)
             {
                 logger.LogError(chatClientEx, "❌ Failed to create or use chat client");
-                Console.WriteLine($"❌ Chat Client Error: {chatClientEx.Message}");
-                Console.WriteLine($"💡 Please check your configuration in appsettings.json");
-                Console.WriteLine($"💡 Make sure the configured chat service is running and accessible");
+
+                Console.Error.WriteLine($"❌ Chat Client Error: {chatClientEx.Message}");
+                Console.Error.WriteLine($"💡 Please check your configuration in appsettings.json");
+                Console.Error.WriteLine($"💡 Make sure the configured chat service is running and accessible");
             }
 
             // Clean up all MCP clients
             await EvMcpClientFactory.DisposeAllAsync(mcpClients);
+
             logger.LogInformation("✅ All tests completed successfully!");
         }
 
         catch (Exception ex)
         {
             logger.LogError(ex, "❌ An error occurred while running the MCP client");
-            Console.WriteLine($"Error: {ex.Message}");
+            Console.Error.WriteLine($"Internal error in MCP client: {ex.Message}");
         }
 
         finally

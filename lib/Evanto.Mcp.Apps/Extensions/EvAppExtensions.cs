@@ -7,31 +7,6 @@ namespace Evanto.Mcp.Apps.Extensions;
 public static class EvAppExtensions
 {
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>   Logs the output message to both the logger and console. </summary>
-    ///
-    /// <remarks>   SvK, 23.06.2025. </remarks>
-    /// 
-    /// <param name="logger">   The logger instance to extend. </param>
-    /// <param name="message">  The message to log and display. </param>
-    /// <param name="args">     Optional arguments for formatting the message. </param>
-    /// 
-    /// <returns>   A Task representing the asynchronous operation. </returns>
-    ///-------------------------------------------------------------------------------------------------
-    // [DebuggerStepThrough]
-    public static async Task LogOutput(this ILogger logger, String message, params Object[] args)
-    {
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(message, args);
-        }
-
-        // if necessary also a markdown renderer like MarkDig can be used
-        Console.WriteLine(message, args);
-
-        await Task.CompletedTask; // ensure method is async (for e.g. markdown rendering)
-    }
-
-    ///-------------------------------------------------------------------------------------------------
     /// <summary>   
     /// Filters out think nodes (&lt;think&gt;...&lt;/think&gt;) from text.
     /// Think nodes are used by AI models for internal reasoning that should be hidden from users.

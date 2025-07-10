@@ -115,7 +115,7 @@ public class SupportWizardDbContext : DbContext
             
             entity.Property(e => e.Channel)
                 .IsRequired()
-                .HasConversion<string>()
+                .HasConversion<String>()
                 .HasMaxLength(20);
             
             entity.Property(e => e.ReceivedAt)
@@ -131,16 +131,16 @@ public class SupportWizardDbContext : DbContext
             
             entity.Property(e => e.Topic)
                 .IsRequired()
-                .HasConversion<string>()
+                .HasConversion<String>()
                 .HasMaxLength(50);
             
             entity.Property(e => e.Priority)
                 .IsRequired()
-                .HasConversion<byte>();
+                .HasConversion<Byte>();
             
             entity.Property(e => e.Status)
                 .IsRequired()
-                .HasConversion<string>()
+                .HasConversion<String>()
                 .HasMaxLength(20);
             
             entity.Property(e => e.AssignedToUserUid)
@@ -194,7 +194,7 @@ public class SupportWizardDbContext : DbContext
             
             entity.Property(e => e.Topic)
                 .IsRequired()
-                .HasConversion<string>()
+                .HasConversion<String>()
                 .HasMaxLength(50);
 
             // Configure indexes
@@ -211,7 +211,7 @@ public class SupportWizardDbContext : DbContext
     ///
     /// <returns>   The number of state entries written to the database. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public override int SaveChanges()
+    public override Int32 SaveChanges()
     {
         UpdateTimestamps();
         return base.SaveChanges();
@@ -226,7 +226,7 @@ public class SupportWizardDbContext : DbContext
     ///
     /// <returns>   The number of state entries written to the database. </returns>
     ///-------------------------------------------------------------------------------------------------
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<Int32> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateTimestamps();
         return await base.SaveChangesAsync(cancellationToken);
