@@ -112,9 +112,8 @@ public static class EvMcpClientFactory
             }
 
             catch (Exception ex)
-            {
-                // Log error but continue disposing other clients
-                Console.WriteLine($"Error disposing {mcpClient.Name}: {ex.Message}");
+            {   // Log error but continue disposing other clients
+                Console.Error.WriteLine($"Error disposing {mcpClient.Name}: {ex.Message}");
             }
         }
     }

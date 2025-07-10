@@ -31,13 +31,11 @@ public class Program
         if (!String.IsNullOrEmpty(settings.SSEListenUrls))
         {
             builder.WebHost.UseUrls(settings.SSEListenUrls);
-            Console.WriteLine($"Listening now on URL: {settings.SSEListenUrls}");
+            logger.LogInformation($"Listening now on URL: {settings.SSEListenUrls}");
         }
 
         builder
             .AddSupportWizard();
-
-        logger.LogInformation($"Support Wizard added...");
 
         builder.Services
             .AddSupportDocs(loggerFactory, settings)
