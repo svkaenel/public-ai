@@ -210,9 +210,9 @@ public class EvCmdAppHelper : EvBaseAppHelper
     public void ShowAvailableProviders(EvHostAppSettings rootConfig)
     {
         try
-        {   // Lade Chat-Client-Konfiguration direkt aus der ChatClient Sektion
-            Console.WriteLine("🔍 Verfügbare Provider und Modelle:");
-            Console.WriteLine($"   Standard-Provider: {rootConfig.DefaultChatClient}");
+        {   // Load Chat-Client configuration directly from the ChatClient section
+            Console.WriteLine("🔍 Available Providers and Models:");
+            Console.WriteLine($"   Default Provider: {rootConfig.DefaultChatClient}");
             Console.WriteLine();
 
             if (rootConfig.ChatClients.Any())
@@ -226,21 +226,21 @@ public class EvCmdAppHelper : EvBaseAppHelper
 
                     Console.WriteLine($"   📦 Provider: {providerName}");
                     Console.WriteLine($"      🔗 Endpoint: {endpoint}");
-                    Console.WriteLine($"      🎯 Standard-Modell: {defaultModel}");
-                    Console.WriteLine($"      🤖 Verfügbare Modelle: {String.Join(", ", availableModels)}");
+                    Console.WriteLine($"      🎯 Default Model: {defaultModel}");
+                    Console.WriteLine($"      🤖 Available Models: {String.Join(", ", availableModels)}");
                     Console.WriteLine();
                 }
             }
 
             else
             {
-                Console.WriteLine("   ⚠️ Keine Provider in der Konfiguration gefunden.");
+                Console.WriteLine("   ⚠️ No providers found in configuration.");
             }
         }
 
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"❌ Fehler beim Laden der Konfiguration: {ex.Message}");
+            Console.Error.WriteLine($"❌ Error loading configuration: {ex.Message}");
         }
     }
 
@@ -251,17 +251,17 @@ public class EvCmdAppHelper : EvBaseAppHelper
     ///-------------------------------------------------------------------------------------------------
     public void ShowHelp()
     {
-        Console.WriteLine("📖 Evanto MCP Command Line Client - Verfügbare Parameter:");
+        Console.WriteLine("📖 Evanto MCP Command Line Client - Available Parameters:");
         Console.WriteLine();
-        Console.WriteLine("  --test             Führt MCP Server Tests durch");
-        Console.WriteLine("  --think            Zeigt <think>-Knoten in Chat-Antworten an");
-        Console.WriteLine("  --telemetry        Aktiviert OpenTelemetry-Überwachung");
-        Console.WriteLine("  --provider <name>  Überschreibt den Standard-Provider (z.B. 'OpenAI', 'Ionos')");
-        Console.WriteLine("  --model <name>     Überschreibt das Standard-Modell (z.B. 'gpt-4', 'meta-llama/Llama-3.3-70B-Instruct')");
-        Console.WriteLine("  --list             Zeigt alle verfügbaren Provider und Modelle an");
-        Console.WriteLine("  --help             Zeigt diese Hilfe an");
+        Console.WriteLine("  --test             Performs MCP Server tests");
+        Console.WriteLine("  --think            Shows <think> nodes in chat responses");
+        Console.WriteLine("  --telemetry        Activates OpenTelemetry monitoring");
+        Console.WriteLine("  --provider <name>  Overrides the default provider (e.g. 'OpenAI', 'Ionos')");
+        Console.WriteLine("  --model <name>     Overrides the default model (e.g. 'gpt-4', 'meta-llama/Llama-3.3-70B-Instruct')");
+        Console.WriteLine("  --list             Shows all available providers and models");
+        Console.WriteLine("  --help             Shows this help");
         Console.WriteLine();
-        Console.WriteLine("Beispiele:");
+        Console.WriteLine("Examples:");
         Console.WriteLine("  dotnet run -- --provider OpenAI --model gpt-4");
         Console.WriteLine("  dotnet run -- --test --provider Ionos");
         Console.WriteLine("  dotnet run -- --think --model o4-mini");
