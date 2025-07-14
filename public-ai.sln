@@ -15,11 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Common", "lib\Ev
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".doc", ".doc", "{A8DCE0F2-25EF-3C7F-CC19-27B02264BF67}"
 	ProjectSection(SolutionItems) = preProject
-		CLAUDE.md = CLAUDE.md
-		CodingRules.md = CodingRules.md
-		Directory.Packages.props = Directory.Packages.props
-		Deploy.md = Deploy.md
-		docker-compose.yaml = docker-compose.yaml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Tools.SupportWizard", "lib\Evanto.Mcp.Tools.SupportWizard\Evanto.Mcp.Tools.SupportWizard.csproj", "{A2CC0F66-B503-4C5C-B30B-CAC66C99668A}"
@@ -46,6 +42,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.QdrantDB", "lib\Evanto.Mcp.QdrantDB\Evanto.Mcp.QdrantDB.csproj", "{F8C1A2B3-4D5E-6F78-9ABC-DEF123456789}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Evanto.Mcp.Pdfs", "lib\Evanto.Mcp.Pdfs\Evanto.Mcp.Pdfs.csproj", "{6EB7232D-9427-4A6D-BBF1-FA2FCBCCF8D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".ai", ".ai", "{8B83B35F-4FEF-C041-C04F-9D3672442596}"
+	ProjectSection(SolutionItems) = preProject
+		CLAUDE.md = CLAUDE.md
+		CodingRules.md = CodingRules.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".global", ".global", "{05FA6F14-80FE-5282-2C62-B6FF69B3508B}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+		docker-compose.yaml = docker-compose.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

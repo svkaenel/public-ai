@@ -66,7 +66,9 @@ public class EvBaseAppHelper
     /// <returns>   The RootConfiguration instance with the loaded settings. </returns>
     ///-------------------------------------------------------------------------------------------------
     public T LoadConfiguration<T>(String[] args) where T : EvHostAppSettings, new()
-    {
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(args, nameof(args));
+        
         var rootConfig = LoadConfiguration<T>();
 
         // Parse command line parameters and adjust configuration
@@ -95,7 +97,7 @@ public class EvBaseAppHelper
         var telemetrySettings = rootConfig.Telemetry;
 
         logger.LogInformation("🔍 Configuring OpenTelemetry...");
-        logger.LogInformation("   Service: {ServiceName} v{ServiceVersion}", telemetrySettings.ServiceName, telemetrySettings.ServiceVersion);
+        logger.LogInformation("   Service: {ServiceName} V-{ServiceVersion}", telemetrySettings.ServiceName, telemetrySettings.ServiceVersion);
         logger.LogInformation("   OTLP Endpoint: {OtlpEndpoint}", telemetrySettings.OtlpEndpoint);
         logger.LogInformation("   Console Exporter: {EnableConsoleExporter}", telemetrySettings.EnableConsoleExporter);
         logger.LogInformation("   Sampling Ratio: {SamplingRatio}", telemetrySettings.SamplingRatio);
@@ -115,9 +117,8 @@ public class EvBaseAppHelper
             tracerProviderBuilder.AddSource(activitySource);
         }
 
-        // Configure exporters
         if (telemetrySettings.EnableConsoleExporter)
-        {
+        {   // Configure exporters
             tracerProviderBuilder.AddConsoleExporter();
         }
 
@@ -141,11 +142,16 @@ public class EvBaseAppHelper
     /// <summary>   Creates a logger for the application. </summary>
     ///
     /// <remarks>   SvK, 03.06.2025. </remarks>
+    /// 
     /// <param name="rootConfig">   The RootConfiguration instance with the logging settings. </param>
+    /// 
     /// <returns>   An ILogger object for the application. </returns>
     ///-------------------------------------------------------------------------------------------------
     public (ILogger, ILoggerFactory) GetLogger(EvBaseAppSettings rootConfig)
-    {   // Create a logger factory
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(rootConfig, nameof(rootConfig));
+
+        // Create a logger factory
         var loggerFactory = LoggerFactory.Create(builder =>
         {
             builder.SetMinimumLevel(LogLevel.Information);
@@ -179,7 +185,10 @@ public class EvBaseAppHelper
     /// <returns>   The value of the parameter or null if not found. </returns>
     ///-------------------------------------------------------------------------------------------------
     private String? GetCommandLineParameter(String[] args, String parameterName)
-    {
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(args, nameof(args));
+        ArgumentNullException.ThrowIfNull(parameterName, nameof(parameterName));
+
         for (var i = 0; i < args.Length - 1; i++)
         {
             if (String.Equals(args[i], parameterName, StringComparison.OrdinalIgnoreCase))
@@ -200,7 +209,10 @@ public class EvBaseAppHelper
     /// <returns>   A Task representing the asynchronous operation. </returns>
     ///-------------------------------------------------------------------------------------------------
     private void ConfigureOpenTelemetryLogging(ILoggingBuilder builder, EvTelemetrySettings telemetrySettings)
-    {
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+        ArgumentNullException.ThrowIfNull(telemetrySettings, nameof(telemetrySettings));
+        
         builder.AddOpenTelemetry(openTelemetryLoggerOptions =>
         {   // Configure OpenTelemetry logging if enabled
             var resourceBuilder = ResourceBuilder.CreateDefault()
@@ -244,24 +256,16 @@ public class EvBaseAppHelper
     ///-------------------------------------------------------------------------------------------------
     private void ApplyEnvironmentVariableOverrides<T>(T settings) where T : EvBaseAppSettings
     {   // check if chat clients are configured
-        var chatClients = settings.ChatClients
+        settings.ChatClients
             .Where(c => !String.IsNullOrEmpty(c.ProviderName))
-            .ToArray();
-
-        foreach (var chatClient in chatClients)
-        {
-            ApplyForProvider(chatClient);
-        }
+            .ToList()
+            .ForEach(c => ApplyForProvider(c));
 
         // also apply to embedding providers if they are configured
-        var embeddingProviders = settings.EmbeddingProviders
+        settings.EmbeddingProviders
             .Where(c => !String.IsNullOrEmpty(c.ProviderName))
-            .ToArray();
-
-        foreach (var embeddingProvider in embeddingProviders)
-        {
-            ApplyForProvider(embeddingProvider);
-        }
+            .ToList()
+            .ForEach(p => ApplyForProvider(p));
     }
 
     ///-------------------------------------------------------------------------------------------------

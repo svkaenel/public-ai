@@ -305,24 +305,22 @@ public class EvChatClientFactory(ILoggerFactory loggerFactory)
     ///
     /// <remarks>   SvK, 03.06.2025. </remarks>
     ///
-    /// <param name="chatClient">       The chat client to test. </param>
-    /// <param name="tools">            Available MCP tools. </param>
-    /// <param name="logger">           Logger for output. </param>
+    /// <param name="chatClient">        The chat client to test. </param>
     /// <param name="cancellationToken"> Cancellation token. </param>
+    /// <param name="timeoutSeconds">    Optional. The timeout in seconds for the test connection. Default is 60 seconds. </param>
     ///
     /// <returns>   True if the connection is successful. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<Boolean> TestConnectionAsync(
-        IChatClient chatClient,
-        CancellationToken cancellationToken = default,
-        Int32 timeoutSeconds = 60)
-    {
-        try
-        {   // check requirements
-            ArgumentNullException.ThrowIfNull(chatClient);
-            ArgumentNullException.ThrowIfNull(mLogger);
+        IChatClient         chatClient,
+        CancellationToken   cancellationToken = default,
+        Int32               timeoutSeconds    = 60)
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(chatClient);
+        ArgumentNullException.ThrowIfNull(mLogger);
 
-            // Test connection with simple message
+        try
+        {   // Test connection with simple message
             mLogger.LogInformation("🧪 Testing {Provider} connection...", chatClient.ToString());
 
             var testMessages = new[]

@@ -25,14 +25,13 @@ public class EvCmdAppHelper : EvBaseAppHelper
     /// <returns>   True if the connection test was successful, false otherwise. </returns>
     ///-------------------------------------------------------------------------------------------------
     public async Task<Boolean> TestChatClientConnectionAsync(ILogger logger, IChatClient chatClient, IList<McpClientTool> tools, String providerName = "Chat Client")
-    {
-        try
-        {   // check requirements
-            ArgumentNullException.ThrowIfNull(chatClient, nameof(chatClient));
-            ArgumentNullException.ThrowIfNull(tools, nameof(tools));
-            ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(chatClient, nameof(chatClient));
+        ArgumentNullException.ThrowIfNull(tools, nameof(tools));
+        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
 
-            // Test connection with a simple message with timeout
+        try
+        {   // Test connection with a simple message with timeout
             logger.LogInformation("🧪 Testing {ProviderName} connection...", providerName);
 
             var testMessages = new[]
@@ -98,7 +97,9 @@ public class EvCmdAppHelper : EvBaseAppHelper
     /// <returns>   The initialized conversation history with system prompt. </returns>
     ///-------------------------------------------------------------------------------------------------
     private async Task<IList<ChatMessage>> InitializeConversationHistoryAsync(ILogger logger)
-    {
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+
         String systemPrompt;
 
         try
@@ -141,7 +142,13 @@ public class EvCmdAppHelper : EvBaseAppHelper
         IChatClient          chatClient,
         IList<McpClientTool> allTools,
         EvHostAppSettings    rootConfig)
-    {   // Initialize conversation
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(logger, nameof(logger));
+        ArgumentNullException.ThrowIfNull(chatClient, nameof(chatClient));
+        ArgumentNullException.ThrowIfNull(allTools, nameof(allTools)); 
+        ArgumentNullException.ThrowIfNull(rootConfig, nameof(rootConfig)); 
+
+        // Initialize conversation
         logger.LogInformation("Starting interactive chat with + MCP tools...");
         logger.LogInformation("Selected provider '{provider}', selected model: '{model}'.", rootConfig.SelectedProvider, rootConfig.SelectedModel);
 
@@ -192,10 +199,10 @@ public class EvCmdAppHelper : EvBaseAppHelper
                 conversationHistory.Add(new ChatMessage(ChatRole.Assistant, chatResponse.Text));
             }
 
-            catch (Exception chatEx)
+            catch (Exception ex)
             {
-                logger.LogError(chatEx, "Error during chat interaction");
-                Console.Error.WriteLine($"\n❌ Error in chat loop with assistant: {chatEx.Message}\n");
+                logger.LogError(ex, "Error during chat interaction");
+                Console.Error.WriteLine($"\n❌ Error in chat loop with assistant: {ex.Message}\n");
             }
         }
     }
@@ -208,7 +215,9 @@ public class EvCmdAppHelper : EvBaseAppHelper
     /// <param name="configuration"> The configuration. </param>
     ///-------------------------------------------------------------------------------------------------
     public void ShowAvailableProviders(EvHostAppSettings rootConfig)
-    {
+    {   // check requirements
+        ArgumentNullException.ThrowIfNull(rootConfig, nameof(rootConfig));
+
         try
         {   // Load Chat-Client configuration directly from the ChatClient section
             Console.WriteLine("🔍 Available Providers and Models:");
